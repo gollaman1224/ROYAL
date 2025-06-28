@@ -20,14 +20,44 @@
     .attendance-entry { border-radius: 14px; margin-bottom: 17px; background: linear-gradient(110deg, #22323a 78%, #131f26 100%); box-shadow: 0 1px 9px #19fff526; padding: 14px 20px 14px 20px; }
     .entry-title { font-weight: bold; color: #1af6ff; font-size: 1.11em; margin-bottom: 7px; }
     .entry-meta { font-size: 0.98em; color: #fff176; margin-bottom: 4px; }
-    .entry-btns { margin-top: 5px; }
-    .entry-btns form { display: inline; }
-    .entry-btns button {
-      background: #262d3a; color: #fff; border: 1.2px solid #1af6ff; border-radius: 6px;
-      padding: 3px 14px; font-size: 0.98em; cursor: pointer; margin-right: 7px;
-      font-weight: 700; transition: background 0.15s;
+
+    /* ▼ 버튼 오른쪽정렬, 가로정렬 스타일 추가 ▼ */
+    .entry-btns {
+      margin-top: 9px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
     }
-    .entry-btns button:hover { background: #1af6ff; color: #232c33; }
+    .entry-btns form {
+      display: inline;
+      margin: 0;
+    }
+    .entry-btns button {
+      background: linear-gradient(95deg, #1af6ff 60%, #5a90ff 100%);
+      color: #181c20;
+      border: none;
+      border-radius: 7px;
+      padding: 7px 19px;
+      font-size: 0.98em;
+      font-weight: 700;
+      cursor: pointer;
+      margin: 0;
+      transition: background 0.15s, color 0.13s;
+    }
+    .entry-btns button.delete-btn {
+      background: #f8687c;
+      color: #fff;
+    }
+    .entry-btns button.delete-btn:hover {
+      background: #ff3c55;
+      color: #fff;
+    }
+    .entry-btns button:not(.delete-btn):hover {
+      filter: brightness(1.09);
+      color: #1af6ff;
+      background: #15272d;
+    }
+
     .new-entry-block { background: #1a1f28; border-radius: 13px; box-shadow: 0 2px 14px #1af6ff22; padding: 21px 16px 12px 16px; margin-bottom: 15px;}
     .new-entry-block label { color: #0ff; font-weight: bold; }
     .new-entry-block input, .new-entry-block select { margin-left: 7px; margin-bottom: 7px; padding: 2px 9px; border-radius: 5px; border: 1px solid #1af6ff55;}
@@ -35,6 +65,7 @@
     @media (max-width: 700px) {
       .container { padding: 12px 2vw; }
       .calendar-bar { flex-direction: column; gap: 4px; }
+      .entry-btns { flex-direction: column; gap: 5px; align-items: flex-end; }
     }
   </style>
 </head>
@@ -87,12 +118,12 @@
                 <input type="hidden" name="boss" value="{{ entry.boss }}">
                 <button type="submit">참여/수정</button>
               </form>
-              <form method="post" action="{{ url_for('attendance_manage') }}" style="display:inline;">
+              <form method="post" action="{{ url_for('attendance_manage') }}">
                 <input type="hidden" name="date" value="{{ entry.date }}">
                 <input type="hidden" name="time" value="{{ entry.time }}">
                 <input type="hidden" name="boss" value="{{ entry.boss }}">
                 <input type="hidden" name="action" value="delete">
-                <button type="submit" onclick="return confirm('정말 삭제할까요?');" style="background:#fe637a; color:white;">삭제</button>
+                <button type="submit" class="delete-btn" onclick="return confirm('정말 삭제할까요?');">삭제</button>
               </form>
             </div>
           </div>
