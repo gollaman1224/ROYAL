@@ -38,7 +38,6 @@
       text-shadow: 0 0 15px #1af6ff55;
     }
 
-    /* ---- form 스타일 ---- */
     .filter-form {
       display: flex;
       gap: 18px;
@@ -64,6 +63,7 @@
       outline: none;
       transition: border 0.18s, box-shadow 0.15s;
       box-shadow: 0 2px 13px #1af6ff13;
+      cursor: pointer;
     }
     .filter-form select:focus,
     .filter-form select:hover {
@@ -90,7 +90,6 @@
       box-shadow: 0 0 0 3px #ffe800cc, 0 6px 32px #1af6ff77;
     }
 
-    /* ---- table ---- */
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { padding: 11px 0; text-align: center; font-size: 1.08rem;}
     th {
@@ -137,16 +136,28 @@
         <select name="period">
           <option value="week" {% if period == "week" %}selected{% endif %}>주간</option>
           <option value="month" {% if period == "month" %}selected{% endif %}>월간</option>
+          <option value="last_week" {% if period == "last_week" %}selected{% endif %}>지난 주</option>
+          <option value="last_month" {% if period == "last_month" %}selected{% endif %}>지난 달</option>
+          <option value="custom" {% if period == "custom" %}selected{% endif %}>사용자 지정</option>
         </select>
       </label>
       <label>
         보스:
         <select name="boss">
+          <option value="" {% if "" in selected_bosses %}selected{% endif %}>전체</option>
           {% for b in boss_set %}
-            <option value="{{ b }}" {% if b in selected_bosses %}selected{% endif %}>{{ b }}</option>
+            <option value="{{ b }}" {% if b == selected_bosses|first %}selected{% endif %}>{{ b }}</option>
           {% endfor %}
         </select>
       </label>
+      {% if period == "custom" %}
+      <label>시작:
+        <input type="date" name="start_date" value="{{ start_date or '' }}">
+      </label>
+      <label>끝:
+        <input type="date" name="end_date" value="{{ end_date or '' }}">
+      </label>
+      {% endif %}
       <button type="submit">조회</button>
     </form>
 

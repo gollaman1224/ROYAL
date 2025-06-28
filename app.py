@@ -4,6 +4,7 @@ import datetime
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from collections import defaultdict, Counter
 from functools import wraps
+import re
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "very_secret_admin_key")
@@ -14,6 +15,16 @@ MAX_PER_PARTY = 5
 SERVERS = ["서버1", "서버2", "서버3", "서버4", "서버5", "서버6"]
 ADMIN_CODE = "ROYAL777"
 EXCLUDED_BOSSES = {"차원의 틈"}
+
+# -------------------- [보스명 통일화 함수] --------------------
+def normalize_boss_name(boss):
+    if not boss:
+        return ""
+    s = str(boss).replace(" ", "").replace("-", "").replace("_", "").lower()
+    # "어비스 3층", "어비스3층", "어비스3 층" 등 → "어비스3층"
+    s = re.sub(r"(어비스|abys?)[\s\-]*([0-9]+)[\s\-]*(층|f)?", lambda m: f"어비스{m.group(2)}층", s)
+    # 필요하면 추가 규칙 더 넣기
+    return s
 
 # -------------------- 로그인 --------------------
 def login_required(f):
@@ -316,15 +327,15 @@ def toggle_field():
 # -------------------- 달력 & 출석 & 일정 --------------------
 def get_all_dates():
     attendance = load_json(ATTENDANCE_FILE, [])
-    # 중복제거+오름차순 날짜 정렬
     return sorted({record["date"] for record in attendance})
 
 @app.route("/calendar")
 @login_required
 def calendar():
     attendance = load_json(ATTENDANCE_FILE, [])
+    for a in attendance:
+        a["boss"] = normalize_boss_name(a["boss"])
     all_dates = get_all_dates()
-    # 날짜 파라미터 우선, 없으면 오늘 날짜
     date = request.args.get("date")
     if not date:
         date = datetime.date.today().isoformat()
@@ -347,29 +358,31 @@ def attendance_manage():
     time = request.values.get("time", "")
     boss = request.values.get("boss", "")
 
+    boss_norm = normalize_boss_name(boss)
     day_attendance = [a for a in attendance if a["date"] == date]
 
     if request.method == "POST":
         action = request.form.get("action", "save")
         form_time = request.form.get("time", "")
         form_boss = request.form.get("boss", "")
+        form_boss_norm = normalize_boss_name(form_boss)
         form_participants = request.form.getlist("participants")
         # 삭제
         if action == "delete" and form_boss:
-            attendance = [a for a in attendance if not (a["date"] == date and a["time"] == form_time and a["boss"] == form_boss)]
+            attendance = [a for a in attendance if not (a["date"] == date and a["time"] == form_time and normalize_boss_name(a["boss"]) == form_boss_norm)]
             save_json(ATTENDANCE_FILE, attendance)
             return redirect(url_for("calendar", date=date))
         # 저장(추가/수정)
         elif form_boss:
-            record = next((a for a in attendance if a["date"] == date and a["time"] == form_time and a["boss"] == form_boss), None)
+            record = next((a for a in attendance if a["date"] == date and a["time"] == form_time and normalize_boss_name(a["boss"]) == form_boss_norm), None)
             if record:
                 record["participants"] = form_participants
             else:
-                attendance.append({"date": date, "time": form_time, "boss": form_boss, "participants": form_participants})
+                attendance.append({"date": date, "time": form_time, "boss": form_boss_norm, "participants": form_participants})
             save_json(ATTENDANCE_FILE, attendance)
             return redirect(url_for("calendar", date=date))
 
-    record = next((a for a in attendance if a["date"] == date and a["time"] == time and a["boss"] == boss), None)
+    record = next((a for a in attendance if a["date"] == date and a["time"] == time and normalize_boss_name(a["boss"]) == boss_norm), None)
     participants = record["participants"] if record else []
 
     return render_template(
@@ -382,13 +395,14 @@ def attendance_manage():
 
 # -------------------- 랭킹 (주간/월간, 보스별) --------------------
 def get_ranking(start_date, end_date, bosses=None):
-    members = load_members()
     attendance = load_json(ATTENDANCE_FILE, [])
     counter = Counter()
+    bosses_norm = set([normalize_boss_name(b) for b in bosses]) if bosses else None
     for a in attendance:
         adate = a["date"]
+        boss_norm = normalize_boss_name(a["boss"])
         if start_date <= adate <= end_date:
-            if not bosses or a["boss"] in bosses:
+            if not bosses_norm or boss_norm in bosses_norm:
                 counter.update(a["participants"])
     return counter.most_common()
 
@@ -398,17 +412,33 @@ def ranking():
     today = datetime.date.today()
     week_start = (today - datetime.timedelta(days=today.weekday()))
     week_end = week_start + datetime.timedelta(days=6)
+    last_week_start = week_start - datetime.timedelta(days=7)
+    last_week_end = week_start - datetime.timedelta(days=1)
     month_start = today.replace(day=1)
     month_end = (month_start + datetime.timedelta(days=32)).replace(day=1) - datetime.timedelta(days=1)
+    last_month_end = month_start - datetime.timedelta(days=1)
+    last_month_start = last_month_end.replace(day=1)
 
     period = request.args.get("period", "week")
-    if period == "month":
+    start_date = None
+    end_date = None
+    if period == "week":
+        start, end = week_start.isoformat(), week_end.isoformat()
+    elif period == "last_week":
+        start, end = last_week_start.isoformat(), last_week_end.isoformat()
+    elif period == "month":
         start, end = month_start.isoformat(), month_end.isoformat()
+    elif period == "last_month":
+        start, end = last_month_start.isoformat(), last_month_end.isoformat()
+    elif period == "custom":
+        start = request.args.get("start_date", week_start.isoformat())
+        end = request.args.get("end_date", week_end.isoformat())
+        start_date, end_date = start, end
     else:
         start, end = week_start.isoformat(), week_end.isoformat()
 
     attendance = load_json(ATTENDANCE_FILE, [])
-    boss_set = sorted({a["boss"] for a in attendance})
+    boss_set = sorted({normalize_boss_name(a["boss"]) for a in attendance})
     bosses = request.args.getlist("boss")
     filter_bosses = bosses if bosses else boss_set
 
@@ -418,7 +448,9 @@ def ranking():
         ranking=ranking_list,
         boss_set=boss_set,
         selected_bosses=filter_bosses,
-        period=period
+        period=period,
+        start_date=start_date,
+        end_date=end_date,
     )
 
 @app.route("/boss_schedule")
@@ -426,7 +458,7 @@ def ranking():
 def boss_schedule():
     schedules = load_json("schedule.json", [])
     attendance = load_json("attendance.json", [])
-    attendance_map = {(a["date"], a["time"], a["boss"]): len(a["participants"]) for a in attendance}
+    attendance_map = {(a["date"], a["time"], normalize_boss_name(a["boss"])): len(a["participants"]) for a in attendance}
     return render_template("boss_schedule.html", schedules=schedules, attendance_map=attendance_map)
 
 # -------------------- 분배 라우트 --------------------
@@ -436,14 +468,21 @@ def distribute():
     members = load_members()
     return render_template("distribute.html", members=members)
 
-# 분배 결과 처리용 라우트 (POST)
 @app.route("/distribute_result", methods=["POST"])
 @login_required
 def distribute_result():
     form_data = request.form
-    # 실제 분배 로직 필요 시 여기에 작성
+    # 실제 분배 로직 필요시 여기에 작성
     return render_template("distribute_result.html", data=form_data)
+from flask import send_file  # 파일 다운로드용 import
+
+# 중간에 적절한 위치에 추가 (예: 다른 route들 아래)
+@app.route("/download/attendance")
+@login_required
+def download_attendance():
+    return send_file(ATTENDANCE_FILE, as_attachment=True)
+
 
 # -----------------------------------------------------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
