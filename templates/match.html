@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>파티 매칭 결과</title>
+  <style>
+    body { background-color: #121212; color: #eee; font-family: 'Orbitron', monospace; padding: 20px; }
+    h2 { color: #00ffd5; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    th, td { padding: 8px; text-align: center; border: 1px solid #00ffd5; }
+    th { background-color: #00ffd5; color: #121212; }
+  </style>
+</head>
+<body>
+  <h1>파티 매칭 결과</h1>
+  {% for i, party in enumerate(parties, 1) %}
+  <h2>파티 {{ i }} ({{ party|length }}명)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>닉네임</th>
+        <th>직업</th>
+        <th>신화개수</th>
+        <th>나침반</th>
+        <th>전설스킬</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for member in party %}
+      <tr>
+        <td>{{ member['닉네임'] }}</td>
+        <td>{{ member['직업'] }}</td>
+        <td>{{ member['신화개수'] }}</td>
+        <td>{% if member['나침반'] == 'O' %✔️{% else %}✘{% endif %}</td>
+        <td>{% if member.get('전설스킬', '없음') == '있음' %}✔️{% else %}✘{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endfor %}
+</body>
+</html>

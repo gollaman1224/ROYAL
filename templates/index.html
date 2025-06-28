@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>멤버 리스트</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #161b22 80%, #0a0f14 100%);
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Orbitron','Malgun Gothic',sans-serif;
+      color: #eaf8ff;
+    }
+    .container {
+      max-width: 1050px;
+      margin: 44px auto 0 auto;
+      background: linear-gradient(145deg, #222930 85%, #181c20 100%);
+      border-radius: 24px;
+      box-shadow: 0 8px 42px #11f3ff77, 0 0 0 2px #1af6ff3f;
+      padding: 36px 28px 36px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .nav-links {
+      margin-bottom: 22px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 16px;
+    }
+    .nav-link {
+      display: inline-block;
+      font-weight: 700;
+      color: #1af6ff;
+      text-decoration: none;
+      padding: 9px 22px;
+      border: 2px solid #1af6ff;
+      border-radius: 13px;
+      transition: background 0.23s, color 0.23s;
+      background: rgba(17,243,255,0.07);
+      font-size: 1.06rem;
+      letter-spacing: 0.2px;
+      box-shadow: 0 0 10px #1af6ff22;
+    }
+    .nav-link:hover {
+      background: #1af6ff;
+      color: #181c20;
+      text-shadow: 0 0 7px #fff;
+    }
+    .search-bar {
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .search-bar input[type="text"] {
+      padding: 10px 14px;
+      font-size: 1rem;
+      border-radius: 11px;
+      border: 1.3px solid #1af6ff44;
+      background: #212a31;
+      color: #1af6ff;
+      outline: none;
+      font-family: inherit;
+    }
+    .search-bar button {
+      padding: 10px 24px;
+      font-size: 1rem;
+      background: linear-gradient(95deg, #1af6ff 60%, #5a90ff 100%);
+      color: #181c20;
+      border: none;
+      border-radius: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 12px #11f3ff22;
+      transition: box-shadow 0.14s, filter 0.14s;
+    }
+    .search-bar button:hover {
+      box-shadow: 0 0 0 2px #1af6ff, 0 2px 16px #11f3ff66;
+      filter: brightness(1.11);
+    }
+    .count-info {
+      margin-bottom: 13px;
+      color: #99cce8;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .group-title {
+      margin-top: 32px;
+      font-size: 1.13rem;
+      color: #1af6ff;
+      font-weight: 900;
+      letter-spacing: 0.7px;
+      text-shadow: 0 0 8px #1af6ff44;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    table {
+      width: 100%;
+      background: rgba(24,28,32,0.94);
+      border-radius: 18px;
+      border-collapse: collapse;
+      margin-bottom: 27px;
+      font-size: 1rem;
+      box-shadow: 0 0 14px #1af6ff33;
+    }
+    th, td {
+      padding: 9px 7px;
+      text-align: center;
+      border-bottom: 1px solid #1af6ff18;
+      font-size: 1rem;
+    }
+    th {
+      background: #1af6ff10;
+      color: #1af6ff;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+    }
+    td {
+      color: #eaf8ff;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .btn-edit, .btn-delete {
+      padding: 5px 13px;
+      font-size: 0.97rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: box-shadow 0.14s, filter 0.13s;
+    }
+    .btn-edit {
+      background: #2fe1b8;
+      color: #172b24;
+      box-shadow: 0 2px 8px #2fe1b844;
+    }
+    .btn-edit:hover {
+      background: #1af6ff;
+      filter: brightness(1.12);
+    }
+    .btn-delete {
+      background: #ff5b7f;
+      color: #fff;
+      margin-left: 5px;
+      box-shadow: 0 2px 8px #ff5b7f44;
+    }
+    .btn-delete:hover {
+      background: #ea3275;
+      filter: brightness(1.09);
+    }
+    @media (max-width: 900px) {
+      .container { padding: 8vw 1vw 10vw 1vw; }
+      table, th, td { font-size: 0.93rem; }
+      .nav-link { font-size: 0.96rem; padding: 7px 8vw; }
+      .group-title { margin-top: 18px; }
+    }
+    @media (max-width: 600px) {
+      .container { padding: 3vw 0 9vw 0; }
+      table, th, td { font-size: 0.87rem; }
+      .nav-link { padding: 8px 5vw; }
+    }
+    .toggle-field {
+      cursor: pointer;
+      font-size: 1.15rem;
+      user-select: none;
+      transition: color 0.17s;
+    }
+    .toggle-field.active {
+      color: #1af6ff;
+      text-shadow: 0 0 8px #1af6ff77;
+    }
+    .toggle-field.inactive {
+      color: #556e8b;
+      opacity: 0.58;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav-links">
+      <a href="{{ url_for('servers') }}" class="nav-link">서버 목록</a>
+      <a href="{{ url_for('party') }}" class="nav-link">파티 매칭</a>
+      <a href="{{ url_for('distribute') }}" class="nav-link">분배 배정</a>
+      <a href="{{ url_for('add_member_form') }}" class="nav-link">+ 새 멤버 추가</a>
+      <a href="{{ url_for('dashboard') }}" class="nav-link">대시보드</a>
+    </div>
+    <form class="search-bar" method="GET" action="{{ url_for('index') }}">
+      <input type="text" name="q" placeholder="닉네임, 직업, 신화, 스킬, 나침반 검색" value="{{ query }}">
+      <button type="submit">검색</button>
+      {% if query %}
+      <a href="{{ url_for('index') }}" style="color:#8ae3ff;font-size:1.03rem;margin-left:10px;">초기화</a>
+      {% endif %}
+    </form>
+    <div class="count-info">
+      전체 멤버 수: {{ total_count }}명
+    </div>
+    {% for job, members in grouped_members.items() %}
+      <div class="group-title">
+        {% if job == "뱅가드" %}🛡️
+        {% elif job == "버서커" %}🪓
+        {% elif job == "나이트레인져" %}🏹
+        {% elif job == "어쌔신" %}⚔️
+        {% elif job == "디바인캐스터" %}💖
+        {% elif job == "엘리멘탈" %}🔥
+        {% elif job == "데스브링어" %}☠️
+        {% elif job == "디스트로이어" %}🎯
+        {% endif %}
+        {{ job }} ({{ members | length }}명)
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>닉네임</th>
+            <th>신화개수</th>
+            <th>나침반</th>
+            <th>전설스킬</th>
+            <th>서버</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for member in members %}
+          <tr>
+            <td>
+              {{ member['닉네임'] }}
+              {% if member['직업'] == "뱅가드" %}🛡️
+              {% elif member['직업'] == "버서커" %}🪓
+              {% elif member['직업'] == "나이트레인져" %}🏹
+              {% elif member['직업'] == "어쌔신" %}⚔️
+              {% elif member['직업'] == "디바인캐스터" %}💖
+              {% elif member['직업'] == "엘리멘탈" %}🔥
+              {% elif member['직업'] == "데스브링어" %}☠️
+              {% elif member['직업'] == "디스트로이어" %}🎯
+              {% endif %}
+            </td>
+            <td>{{ member['신화개수'] }}</td>
+            <td class="toggle-field {% if member['나침반'] == 'O' %}active{% else %}inactive{% endif %}"
+                data-field="나침반" data-nick="{{ member['닉네임'] }}">
+              {% if member['나침반'] == 'O' %}✔️{% else %}✘{% endif %}
+            </td>
+            <td class="toggle-field {% if member.get('전설스킬', '없음') == '있음' %}active{% else %}inactive{% endif %}"
+                data-field="전설스킬" data-nick="{{ member['닉네임'] }}">
+              {% if member.get('전설스킬', '없음') == '있음' %}✔️{% else %}✘{% endif %}
+            </td>
+            <td>{{ member['서버'] }}</td>
+            <td>
+              <a class="btn-edit" href="{{ url_for('edit_member', nick=member['닉네임']) }}">수정</a>
+              <a class="btn-delete" href="{{ url_for('delete_member', nick=member['닉네임']) }}" onclick="return confirm('정말 삭제할까요?');">삭제</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endfor %}
+  </div>
+<script>
+  // 검색 자동 포커스 + 커서 끝 이동
+  window.onload = function() {
+    const searchInput = document.querySelector('.search-bar input[name="q"]');
+    if (searchInput) {
+      searchInput.focus();
+      const val = searchInput.value;
+      searchInput.value = '';
+      searchInput.value = val;
+    }
+  };
+
+  // 나침반/전설스킬 클릭 토글 (AJAX)
+  document.querySelectorAll('td.toggle-field').forEach(cell => {
+    cell.addEventListener('click', () => {
+      const nick = cell.dataset.nick;
+      const field = cell.dataset.field;
+      const isActive = cell.classList.contains("active");
+      let newVal = "";
+      if(field === "나침반") {
+        newVal = isActive ? "" : "O";
+      } else if(field === "전설스킬") {
+        newVal = isActive ? "없음" : "있음";
+      }
+      fetch('/toggle_field', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({nick: nick, field: field, value: newVal})
+      })
+      .then(res => res.json())
+      .then(data => {
+        if(data.success){
+          cell.textContent = (newVal === "" || newVal === "없음") ? "✘" : "✔️";
+          cell.classList.toggle("active");
+          cell.classList.toggle("inactive");
+        } else {
+          alert("변경 실패: " + (data.error || "알 수 없는 오류"));
+        }
+      })
+      .catch(() => alert("서버와 통신 실패"));
+    });
+  });
+</script>
+</body>
+</html>

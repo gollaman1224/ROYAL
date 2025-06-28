@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>서버별 멤버 배치</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #191f28 80%, #10141a 100%);
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Orbitron','Malgun Gothic',sans-serif;
+      color: #eaf8ff;
+    }
+    .server-container {
+      max-width: 1150px;
+      margin: 42px auto 0 auto;
+      background: linear-gradient(145deg, #232b34 85%, #181c20 100%);
+      border-radius: 22px;
+      box-shadow: 0 8px 48px #11f3ff77, 0 0 0 2px #1af6ff3f;
+      padding: 38px 18px 30px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .server-title {
+      font-size: 2.16rem;
+      color: #1af6ff;
+      font-weight: 900;
+      letter-spacing: 2.2px;
+      text-shadow: 0 0 16px #1af6ff66, 0 2px 8px #2228;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+    .server-actions {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+    .server-btn {
+      padding: 10px 25px;
+      font-size: 1rem;
+      background: linear-gradient(95deg, #1af6ff 60%, #5a90ff 100%);
+      color: #181c20;
+      border: none;
+      border-radius: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      margin-right: 14px;
+      margin-bottom: 6px;
+      box-shadow: 0 2px 12px #11f3ff22;
+      transition: box-shadow 0.13s, filter 0.13s;
+      text-decoration: none;
+      display: inline-block;
+      letter-spacing: 1px;
+    }
+    .server-btn:hover {
+      box-shadow: 0 0 0 2px #1af6ff, 0 2px 18px #11f3ff77;
+      filter: brightness(1.10);
+      color: #1af6ff;
+      background: #1a2733;
+    }
+    .server-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+      gap: 32px 22px;
+      margin-top: 10px;
+    }
+    .server-block {
+      background: rgba(17, 35, 49, 0.95);
+      border-radius: 15px;
+      box-shadow: 0 2px 18px #1af6ff22;
+      border: 2px solid #1af6ff18;
+      padding: 16px 10px 14px 10px;
+      transition: box-shadow 0.14s;
+      min-width: 0;
+      position: relative;
+    }
+    .server-block:hover {
+      box-shadow: 0 0 0 2.5px #1af6ff, 0 4px 32px #11f3ffaa;
+    }
+    .server-header {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #1af6ff;
+      margin-bottom: 11px;
+      text-shadow: 0 0 8px #1af6ff22;
+      text-align: center;
+      letter-spacing: 1.2px;
+    }
+    .server-warning {
+      color: #ff6a91;
+      font-weight: 800;
+      font-size: 1.01rem;
+      display: block;
+      margin-bottom: 6px;
+      text-align: center;
+      letter-spacing: 0.6px;
+    }
+    .server-good {
+      color: #7fffcc;
+      font-weight: 800;
+      font-size: 1.01rem;
+      display: block;
+      margin-bottom: 6px;
+      text-align: center;
+      letter-spacing: 0.6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.97rem;
+      background: transparent;
+      margin-bottom: 8px;
+      border-radius: 13px;
+      overflow: hidden;
+      table-layout: fixed;
+    }
+    th, td {
+      padding: 7px 3px;
+      text-align: center;
+      border-bottom: 1px solid #1af6ff14;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    th {
+      background: #1af6ff0f;
+      color: #1af6ff;
+      font-weight: 800;
+      letter-spacing: 1px;
+      font-size: 0.97em;
+    }
+    td {
+      color: #eaf8ff;
+      font-size: 0.97em;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    td strong {
+      color: #1af6ff;
+      font-weight: 900;
+      letter-spacing: 0.6px;
+    }
+    td .char-part {
+      font-size: 0.82em;
+      color: #47eaff;
+      font-weight: 700;
+    }
+    select.server-select {
+      padding: 2.5px 6px;
+      border-radius: 7px;
+      border: 1px solid #1af6ff55;
+      background: #17252c;
+      color: #1af6ff;
+      font-family: inherit;
+      font-size: 0.97em;
+      margin-left: 0;
+      margin-right: 1px;
+      transition: border 0.13s;
+    }
+    select.server-select:focus {
+      border: 1.6px solid #1af6ffcc;
+      outline: none;
+    }
+    /* 직업별 이모티콘 */
+    .job-icon { font-size: 1.08em; margin-right: 2.5px; vertical-align: -2px;}
+    @media (max-width: 1100px) {
+      .server-container { padding: 8px 0 10vw 0; }
+      .server-title { font-size: 1.32rem; }
+      .server-list { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 700px) {
+      .server-container { padding: 1vw 1vw 11vw 1vw; }
+      .server-title { font-size: 1.08rem; }
+      table, th, td { font-size: 0.92em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="server-container">
+    <div class="server-title">서버별 멤버 배치</div>
+    <div class="server-actions">
+      <a href="{{ url_for('party') }}" class="server-btn">파티 보기</a>
+      <a href="{{ url_for('index') }}" class="server-btn">멤버 리스트</a>
+      <a href="{{ url_for('dashboard') }}" class="server-btn">대시보드</a>
+    </div>
+    <div class="server-list">
+      {% for server in servers %}
+      {% set members = server_allocation[server] %}
+      {% set tanks = members | selectattr('직업', 'in', ['뱅가드', '버서커']) | list %}
+      {% set heals = members | selectattr('직업', 'equalto', '디바인캐스터') | list %}
+      {% set dps = members | selectattr('직업', 'in', ['디스트로이어','나이트레인져','엘리멘탈','데스브링어']) | list %}
+      {% set burst = members | selectattr('직업', 'equalto', '어쌔신') | list %}
+      {% set legend_heal = heals | selectattr('전설스킬', 'equalto', '있음') | list %}
+      {% set compass_count = members | selectattr('나침반', 'equalto', 'O') | list | length %}
+      {% set myth_sum = members | map(attribute='신화개수') | sum %}
+      {% set warnings = [] %}
+      {% if not tanks %} {% set _ = warnings.append("탱커 없음") %} {% endif %}
+      {% if not heals %} {% set _ = warnings.append("힐러 없음") %} {% endif %}
+      {% if not burst %} {% set _ = warnings.append("극딜러 없음") %} {% endif %}
+      {% if legend_heal|length == 0 %} {% set _ = warnings.append("전설스킬 힐러 없음") %} {% endif %}
+      {% if compass_count < members|length %} {% set _ = warnings.append("나침반 미달(" ~ compass_count ~ "/" ~ members|length ~ ")") %} {% endif %}
+      {% if myth_sum < 10 %} {% set _ = warnings.append("신화합계 10 미만(" ~ myth_sum ~ ")") %} {% endif %}
+      <div class="server-block" data-server="{{ server }}">
+        <div class="server-header">{{ server }}</div>
+        {% if warnings %}
+          <span class="server-warning">⚠️ {{ warnings|join(', ') }}</span>
+        {% else %}
+          <span class="server-good">✅ 모든 조건 충족</span>
+        {% endif %}
+        <table>
+          <thead>
+            <tr>
+              <th style="width:95px;">닉네임</th>
+              <th style="width:84px;">직업</th>
+              <th style="width:36px;">신화</th>
+              <th style="width:38px;">전설</th>
+              <th style="width:38px;">나침반</th>
+              <th style="width:84px;">서버 이동</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for member in members %}
+            <tr>
+              <td>
+                {% set full_name = member['닉네임'] %}
+                {% set name_part = full_name.split('(')[0] %}
+                {% set char_part = '' %}
+                {% if '(' in full_name and ')' in full_name %}
+                  {% set char_part = full_name.split('(')[1].rstrip(')') %}
+                {% endif %}
+                <strong>{{ name_part }}</strong>
+                {% if char_part %}
+                  <br><span class="char-part">{{ char_part }}</span>
+                {% endif %}
+              </td>
+              <td style="font-weight:700; color: {{ job_colors.get(member['직업'], '#7bf') }};">
+                <span class="job-icon">
+                  {% if member['직업'] == "뱅가드" %}🛡️
+                  {% elif member['직업'] == "버서커" %}🪓
+                  {% elif member['직업'] == "나이트레인져" %}🏹
+                  {% elif member['직업'] == "어쌔신" %}⚔️
+                  {% elif member['직업'] == "디바인캐스터" %}💖
+                  {% elif member['직업'] == "엘리멘탈" %}🔥
+                  {% elif member['직업'] == "데스브링어" %}☠️
+                  {% elif member['직업'] == "디스트로이어" %}🎯
+                  {% endif %}
+                </span>
+                {{ member['직업'] }}
+              </td>
+              <td style="font-weight:700; color:#1af6ff;">{{ member['신화개수'] }}</td>
+              <td>
+                {% if member.get('전설스킬', '없음') == '있음' %}✔️{% else %}✘{% endif %}
+              </td>
+              <td>
+                {% if member.get('나침반', '') == 'O' %}✔️{% else %}✘{% endif %}
+              </td>
+              <td>
+                <select class="server-select" data-nick="{{ member['닉네임'] }}">
+                  {% for s in servers %}
+                  <option value="{{ s }}" {% if member["서버"] == s %}selected{% endif %}>{{ s }}</option>
+                  {% endfor %}
+                </select>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('.server-select').forEach(select => {
+      select.addEventListener('change', function() {
+        const nick = this.getAttribute('data-nick');
+        const new_server = this.value;
+        fetch('{{ url_for("change_server") }}', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({nick: nick, new_server: new_server})
+        })
+        .then(res => res.json())
+        .then(data => {
+          if(data.success) {
+            location.reload();
+          } else {
+            alert(data.error || '서버 변경 실패');
+          }
+        })
+        .catch(() => alert('서버와 통신 실패'));
+      });
+    });
+  </script>
+</body>
+</html>

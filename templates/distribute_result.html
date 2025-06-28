@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>분배 결과</title>
+  <style>
+    body {
+      background: #181c20;
+      color: #eaf8ff;
+      font-family: 'Orbitron', 'Malgun Gothic', sans-serif;
+      margin: 0;
+    }
+    .result-container {
+      max-width: 1100px;
+      margin: 48px auto 32px auto;
+      padding: 36px 28px 38px 28px;
+      background: linear-gradient(145deg, #222930 88%, #181c20 100%);
+      border-radius: 24px;
+      box-shadow: 0 8px 48px #11f3ff77, 0 0 0 2px #1af6ff3f;
+      overflow: hidden;
+    }
+    .result-title {
+      color: #1af6ff;
+      font-size: 2.22rem;
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 25px;
+      letter-spacing: 2.3px;
+      text-shadow: 0 0 24px #00ffe7, 0 0 38px #1af6ff55;
+      border-bottom: 2.5px solid #18ffffaa;
+      padding-bottom: 14px;
+    }
+    .result-summary {
+      text-align: left;
+      margin-bottom: 18px;
+      font-size: 1.12em;
+      color: #84e3ff;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .result-summary b,
+    .result-summary strong {
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.11em;
+    }
+    .missed {
+      color: #ff7882;
+      font-weight: 700;
+      background: #2a0f24cc;
+      border-radius: 7px;
+      padding: 2px 7px;
+      margin-right: 4px;
+      box-shadow: 0 0 6px #ff788233;
+      font-size: 1em;
+    }
+    .result-section {
+      margin-bottom: 20px;
+      border-radius: 14px;
+      box-shadow: 0 0 22px #1af6ff44, 0 0 0 2px #1af6ff33;
+      background: linear-gradient(120deg, #202a33 75%, #1e2333 100%);
+      padding: 2px 0 8px 0;
+      position: relative;
+    }
+    .result-section.healer {
+      background: linear-gradient(90deg, #143349 60%, #183e5e 100%);
+      box-shadow: 0 0 32px #19fff4, 0 0 0 2px #19fff533;
+    }
+    .result-section-label {
+      position: absolute;
+      left: 22px; top: -16px;
+      background: #1af6ff;
+      color: #113139;
+      padding: 3px 17px 4px 17px;
+      font-size: 1.08em;
+      border-radius: 13px 13px 0 0;
+      font-weight: 900;
+      letter-spacing: 2px;
+      box-shadow: 0 2px 12px #19fff5cc;
+      z-index: 2;
+    }
+    .result-section-label.others {
+      background: #ffe172;
+      color: #212;
+      box-shadow: 0 2px 8px #ffe17266;
+    }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-bottom: 6px;
+      background: linear-gradient(120deg, #273044 82%, #162029 100%);
+      box-shadow: 0 3px 30px #17eaff11;
+      border-radius: 16px;
+      overflow: hidden;
+      font-size: 1.06em;
+    }
+    th, td {
+      padding: 10px 7px;
+      text-align: center;
+      font-size: 1em;
+      border-bottom: 1.7px solid #182c40;
+      font-weight: 600;
+      transition: background 0.18s, color 0.18s;
+    }
+    th {
+      background: linear-gradient(90deg, #16d2ff 0%, #00ffe4 100%);
+      color: #113139;
+      font-weight: 900;
+      font-size: 1.11em;
+      letter-spacing: 1.1px;
+      border-bottom: 4px solid #1af6ffcc;
+      text-shadow: 0 0 7px #d9fdff;
+    }
+    tr.healer-row td {
+      background: linear-gradient(90deg, #1d3955 60%, #002f43 100%) !important;
+      color: #36ffe1 !important;
+      font-weight: 800;
+      border-left: 3.5px solid #1af6ffcc;
+      letter-spacing: 0.1px;
+    }
+    tr.tank-row td {
+      color: #ffbabf !important;
+      font-weight: 700;
+    }
+    tr.dps-row td {
+      color: #ffe78c !important;
+      font-weight: 600;
+    }
+    .final-pay {
+      font-weight: 900;
+      color: #ffe944 !important;
+      text-shadow: 0 0 10px #fff17655, 0 0 2px #1af6ff;
+      background: linear-gradient(90deg,#152e40 60%,#19fff522 100%);
+      border-radius: 0 14px 14px 0;
+      border-right: 2px solid #ffe17277;
+      font-size: 1.13em;
+    }
+    tr.highlight td.final-pay {
+      background: linear-gradient(90deg,#fff59d 30%,#19fff5 100%);
+      color: #283c31 !important;
+      font-size: 1.16em;
+      text-shadow: 0 0 15px #fff9;
+    }
+    td, th { white-space: nowrap; }
+    .note-block {
+      background: #13212f;
+      color: #b9f5ff;
+      border-radius: 13px;
+      padding: 13px 19px 13px 19px;
+      font-size: 1.07em;
+      margin-top: 22px;
+      font-weight: 600;
+      box-shadow: 0 2px 16px #17eaff33;
+    }
+    .note-block b { color: #18ffff; }
+    @media (max-width: 900px) {
+      .result-container { padding: 6px 2vw; }
+      table, th, td { font-size: 0.96em; }
+      .result-title { font-size: 1.4rem; }
+      th, td { padding: 8px 3px; }
+    }
+    @media (max-width: 600px) {
+      .result-title { font-size: 1.07rem; }
+      .result-container { padding: 1px; }
+      table, th, td { font-size: 0.93em; }
+      th, td { padding: 6px 2px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="result-container">
+    <div class="result-title">분배 결과</div>
+    <div class="result-summary">
+      <b>분배 대상 인원 {{ result.members|length }}</b><br>
+      <b>총 분배 다야:</b> {{ result.total }} 
+      <span style="color:#38ffe2;">(인원별: {{ result.shared }}, 성채: {{ result.strong_dia }})</span><br>
+      <b>힐러 추가금:</b> <span style="color:#00ffe4;">{{ result.healer_bonus }}</span>
+      / <b>신화 개당 추가금:</b> <span style="color:#00ffe4;">{{ result.myth_unit }}</span>
+      <br>
+      <b>인원별 기본 몫:</b> <span style="color:#fdffbc;">{{ result.shared }}</span>
+    </div>
+    
+    {# ---- 힐러 구역 ---- #}
+    <div class="result-section healer">
+      <div class="result-section-label">힐러 (Healer)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>닉네임</th>
+            <th>직업</th>
+            <th>신화</th>
+            <th>힐러추가</th>
+            <th>신화추가</th>
+            <th>기부/감액</th>
+            <th>최종몫</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set healer_list = result.members | selectattr('직업', 'equalto', '디바인캐스터') | sort(attribute='신화개수', reverse=True) | list %}
+          {% set max_pay = healer_list | map(attribute='분배금') | max %}
+          {% for m in healer_list %}
+          <tr class="healer-row{% if m['분배금'] == max_pay %} highlight{% endif %}">
+            <td>{{ m['닉네임'] }}</td>
+            <td>{{ m['직업'] }}</td>
+            <td>{{ m['신화개수'] }}</td>
+            <td>{{ m.get('힐러추가', 0) }}</td>
+            <td>{{ m.get('신화추가', 0) }}</td>
+            <td>{{ m.get('기부', 0) }}</td>
+            <td class="final-pay">{{ m['분배금'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {# ---- 일반구역 ---- #}
+    <div class="result-section others">
+      <div class="result-section-label others">일반</div>
+      <table>
+        <thead>
+          <tr>
+            <th>닉네임</th>
+            <th>직업</th>
+            <th>신화</th>
+            <th>힐러추가</th>
+            <th>신화추가</th>
+            <th>기부/감액</th>
+            <th>최종몫</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set others_list = result.members | rejectattr('직업', 'equalto', '디바인캐스터') | sort(attribute='신화개수', reverse=True) | list %}
+          {% set max_pay_others = others_list | map(attribute='분배금') | max %}
+          {% for m in others_list %}
+          <tr class="
+            {% if m['직업']=='디바인캐스터' %}healer-row{% elif m['직업'] in ['뱅가드','버서커'] %}tank-row
+            {% elif m['직업'] in ['엘리멘탈','데스브링어','디스트로이어','나이트레인져','어쌔신'] %}dps-row
+            {% endif %}
+            {% if m['분배금'] == max_pay_others %} highlight{% endif %}
+          ">
+            <td>{{ m['닉네임'] }}</td>
+            <td>{{ m['직업'] }}</td>
+            <td>{{ m['신화개수'] }}</td>
+            <td>{% if m['직업']=='디바인캐스터' %}{{ m.get('힐러추가', 0) }}{% else %}0{% endif %}</td>
+            <td>{{ m.get('신화추가', 0) }}</td>
+            <td>{{ m.get('기부', 0) }}</td>
+            <td class="final-pay">{{ m['분배금'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="note-block">
+      <b>특이사항:</b>
+      {% if result.missed %}
+        미참석 인원
+        {% for nick in result.missed %}
+          <span class="missed">{{ nick }}</span>{% if not loop.last %},{% endif %}
+        {% endfor %}
+      {% else %}
+        <b style="color:#0ff;font-size:1.08em;">전체 참석</b>
+      {% endif %}
+      <br>
+      힐러 <b>{{ result.members | selectattr('직업', 'equalto', '디바인캐스터') | list | length }}</b>명,
+      신화 합계 <b>{{ result.members | map(attribute='신화개수') | sum }}</b>,
+      힐러 추가금 <b>{{ result.healer_bonus }}</b>, 신화 개당 추가금 <b>{{ result.myth_unit }}</b>
+    </div>
+  </div>
+</body>
+</html>

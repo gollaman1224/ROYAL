@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>멤버 정보 수정</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #181c20 80%, #0a0f14 100%);
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Orbitron','Malgun Gothic',sans-serif;
+      color: #eaf8ff;
+    }
+    .container {
+      max-width: 440px;
+      margin: 64px auto 0 auto;
+      background: linear-gradient(145deg, #222930 85%, #181c20 100%);
+      border-radius: 22px;
+      box-shadow: 0 8px 40px #11f3ff55, 0 0 0 2px #1af6ff22;
+      padding: 38px 26px 32px 26px;
+      position: relative;
+    }
+    h2 {
+      color: #1af6ff;
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin-bottom: 18px;
+      text-shadow: 0 0 12px #1af6ff33;
+      text-align: center;
+    }
+    form label {
+      display: block;
+      margin-bottom: 10px;
+      color: #82d3ff;
+      font-size: 1.09rem;
+      font-weight: 700;
+      margin-top: 17px;
+    }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 12px 10px;
+      margin-bottom: 7px;
+      border: 1.2px solid #1af6ff55;
+      border-radius: 9px;
+      font-size: 1rem;
+      background: #19252d;
+      color: #1af6ff;
+      font-family: inherit;
+      outline: none;
+      box-sizing: border-box;
+      margin-top: 6px;
+    }
+    input[type="text"]:focus, input[type="number"]:focus, select:focus {
+      border-color: #1af6ff;
+      background: #17232a;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 13px 0;
+      font-size: 1.09rem;
+      background: linear-gradient(93deg, #1af6ff 60%, #5a90ff 100%);
+      color: #181c20;
+      border: none;
+      border-radius: 11px;
+      font-weight: 900;
+      cursor: pointer;
+      margin-top: 22px;
+      box-shadow: 0 3px 14px #11f3ff22;
+      transition: box-shadow 0.14s, filter 0.13s;
+    }
+    .submit-btn:hover {
+      box-shadow: 0 0 0 2px #1af6ff, 0 2px 14px #11f3ff88;
+      filter: brightness(1.11);
+    }
+    .back-link {
+      display: block;
+      margin-top: 21px;
+      text-align: center;
+      color: #1af6ff;
+      text-decoration: none;
+      font-size: 1.04rem;
+      font-weight: 700;
+      border-radius: 9px;
+      padding: 9px 0 0 0;
+      transition: color 0.16s;
+    }
+    .back-link:hover {
+      color: #fff;
+      text-shadow: 0 0 7px #1af6ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>멤버 정보 수정</h2>
+    <form method="post" action="{{ url_for('update_member', nick=member['닉네임']) }}">
+      <label for="닉네임">닉네임</label>
+      <input type="text" name="닉네임" id="닉네임" required autocomplete="off" maxlength="32" value="{{ member['닉네임'] }}">
+
+      <label for="직업">직업</label>
+      <select name="직업" id="직업" required>
+        <option value="">직업 선택</option>
+        <option value="뱅가드" {% if member['직업'] == '뱅가드' %}selected{% endif %}>뱅가드 (탱커)</option>
+        <option value="버서커" {% if member['직업'] == '버서커' %}selected{% endif %}>버서커 (반탱커)</option>
+        <option value="디스트로이어" {% if member['직업'] == '디스트로이어' %}selected{% endif %}>디스트로이어 (딜러)</option>
+        <option value="나이트레인져" {% if member['직업'] == '나이트레인져' %}selected{% endif %}>나이트레인져 (딜러)</option>
+        <option value="엘리멘탈" {% if member['직업'] == '엘리멘탈' %}selected{% endif %}>엘리멘탈 (마법딜러)</option>
+        <option value="디바인캐스터" {% if member['직업'] == '디바인캐스터' %}selected{% endif %}>디바인캐스터 (힐러)</option>
+        <option value="어쌔신" {% if member['직업'] == '어쌔신' %}selected{% endif %}>어쌔신 (극딜러)</option>
+        <option value="데스브링어" {% if member['직업'] == '데스브링어' %}selected{% endif %}>데스브링어 (딜러)</option>
+      </select>
+
+      <label for="신화개수">신화개수</label>
+      <input type="number" name="신화개수" id="신화개수" min="0" max="6" required value="{{ member['신화개수'] }}">
+
+      <label for="나침반">나침반</label>
+      <select name="나침반" id="나침반">
+        <option value="" {% if not member['나침반'] %}selected{% endif %}>없음</option>
+        <option value="O" {% if member['나침반'] == 'O' %}selected{% endif %}>O (보유)</option>
+      </select>
+
+      <label for="전설스킬">전설스킬</label>
+      <select name="전설스킬" id="전설스킬">
+        <option value="없음" {% if member.get('전설스킬','') != '있음' %}selected{% endif %}>없음</option>
+        <option value="있음" {% if member.get('전설스킬','') == '있음' %}selected{% endif %}>있음</option>
+      </select>
+
+      <label for="서버">서버</label>
+      <select name="서버" id="서버" required>
+        {% for s in ["서버1", "서버2", "서버3", "서버4", "서버5", "서버6"] %}
+        <option value="{{ s }}" {% if member['서버'] == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+      
+      <button type="submit" class="submit-btn">수정 완료</button>
+    </form>
+    <a href="{{ url_for('index') }}" class="back-link">← 돌아가기</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>참여 랭킹</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #181c20;
+      color: #eaf8ff;
+      font-family: 'Orbitron','Malgun Gothic',sans-serif;
+      margin:0;
+    }
+    .container {
+      max-width: 510px;
+      margin: 52px auto 0 auto;
+      background: linear-gradient(145deg, #222930 85%, #181c20 100%);
+      border-radius: 20px;
+      box-shadow: 0 8px 42px #11f3ff33, 0 0 0 2px #1af6ff1f;
+      padding: 38px 32px 30px 32px;
+    }
+    .back-link {
+      color: #19faff;
+      text-decoration: none;
+      margin-bottom: 16px;
+      display: inline-block;
+      font-size: 1.08rem;
+      font-weight: bold;
+      transition: color 0.18s;
+    }
+    .back-link:hover { color: #ffe800; }
+
+    h2 {
+      color: #1af6ff;
+      font-size: 2.1rem;
+      font-weight: 900;
+      margin-bottom: 16px;
+      text-shadow: 0 0 15px #1af6ff55;
+    }
+
+    /* ---- form 스타일 ---- */
+    .filter-form {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      margin-bottom: 17px;
+      flex-wrap: wrap;
+    }
+    .filter-form label {
+      font-weight: 700;
+      color: #84e3ff;
+      letter-spacing: 1.2px;
+      margin-right: 2px;
+      font-size: 1.05em;
+    }
+    .filter-form select {
+      background: #191e28;
+      color: #1af6ff;
+      border: 2px solid #1af6ff55;
+      border-radius: 9px;
+      font-size: 1.06em;
+      padding: 7px 16px 7px 11px;
+      margin-right: 10px;
+      outline: none;
+      transition: border 0.18s, box-shadow 0.15s;
+      box-shadow: 0 2px 13px #1af6ff13;
+    }
+    .filter-form select:focus,
+    .filter-form select:hover {
+      border-color: #19fff7;
+      box-shadow: 0 0 0 2px #19fff733;
+    }
+    .filter-form button {
+      background: linear-gradient(90deg, #00ffe4 25%, #1af6ff 100%);
+      color: #152b34;
+      font-weight: 900;
+      font-size: 1.08em;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 32px;
+      box-shadow: 0 4px 20px #1af6ff33;
+      cursor: pointer;
+      transition: background 0.17s, box-shadow 0.17s;
+      letter-spacing: 1px;
+      text-shadow: 0 0 7px #fff3;
+    }
+    .filter-form button:hover {
+      background: linear-gradient(90deg, #ffe800 20%, #1af6ff 100%);
+      color: #222930;
+      box-shadow: 0 0 0 3px #ffe800cc, 0 6px 32px #1af6ff77;
+    }
+
+    /* ---- table ---- */
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 11px 0; text-align: center; font-size: 1.08rem;}
+    th {
+      background: #181c20;
+      color: #19faff;
+      font-weight: 900;
+      border-bottom: 2px solid #19faff55;
+      letter-spacing: 1.4px;
+    }
+    tr { border-bottom: 1px solid #11f3ff23;}
+    .rank-num {
+      font-weight: bold;
+      color: #1af6ff;
+      font-size: 1.13rem;
+      letter-spacing: 2px;
+    }
+    .top1 { color: #ffe800; font-weight: 900; }
+    .top2 { color: #b2d6ff; font-weight: 900; }
+    .top3 { color: #fe9fd4; font-weight: 900; }
+
+    .no-data {
+      padding: 32px;
+      color: #1af6ff;
+      font-size: 1.14rem;
+      text-align:center;
+      letter-spacing: 1.2px;
+      text-shadow: 0 0 8px #1af6ff33;
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 4vw 2vw 6vw 2vw; }
+      h2 { font-size: 1.1rem; }
+      .filter-form select, .filter-form button { font-size: 1em; padding: 7px 12px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back-link" href="{{ url_for('dashboard') }}">← 대시보드로</a>
+    <h2>참여 랭킹</h2>
+    <form class="filter-form" method="get" action="{{ url_for('ranking') }}">
+      <label>
+        기간:
+        <select name="period">
+          <option value="week" {% if period == "week" %}selected{% endif %}>주간</option>
+          <option value="month" {% if period == "month" %}selected{% endif %}>월간</option>
+        </select>
+      </label>
+      <label>
+        보스:
+        <select name="boss">
+          {% for b in boss_set %}
+            <option value="{{ b }}" {% if b in selected_bosses %}selected{% endif %}>{{ b }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button type="submit">조회</button>
+    </form>
+
+    <table>
+      <tr>
+        <th>순위</th>
+        <th>닉네임</th>
+        <th>참여 횟수</th>
+      </tr>
+      {% for row in ranking %}
+        <tr>
+          <td class="rank-num {% if loop.index0 == 0 %}top1{% elif loop.index0 == 1 %}top2{% elif loop.index0 == 2 %}top3{% endif %}">{{ loop.index }}</td>
+          <td class="{% if loop.index0 == 0 %}top1{% elif loop.index0 == 1 %}top2{% elif loop.index0 == 2 %}top3{% endif %}">{{ row[0] }}</td>
+          <td style="font-weight:bold; font-size:1.06rem;">{{ row[1] }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+    {% if not ranking %}
+      <div class="no-data">
+        기록된 참여 내역이 없습니다.
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>

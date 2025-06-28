@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>참여 관리</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body { background: #181c20; color: #eaf8ff; font-family: 'Orbitron','Malgun Gothic',sans-serif; margin:0; }
+    .container { max-width: 520px; margin: 54px auto 0 auto; background: linear-gradient(145deg, #222930 85%, #181c20 100%); border-radius: 20px; box-shadow: 0 8px 42px #11f3ff33, 0 0 0 2px #1af6ff1f; padding: 38px 32px 30px 32px; }
+    h2 { color: #1af6ff; font-size: 2.1rem; font-weight: 900; margin-bottom: 10px;}
+    .date-select { margin-bottom: 24px; }
+    .btn { background: linear-gradient(90deg,#1af6ff 60%,#5a90ff 100%); color:#181c20; font-weight:900; border:none; border-radius:10px; padding:9px 22px; cursor:pointer; margin-right:8px; }
+    .btn-del { background: #ff5777; color: #fff; font-weight: bold; border-radius:10px; border:none; padding:9px 18px; margin-left:8px; cursor:pointer;}
+    .back-link { color:#19faff; text-decoration:none; font-size:1.08rem; font-weight:bold;}
+    table { width:100%; border-collapse:collapse; margin-top:16px; }
+    th, td { padding:9px 0; text-align:center; }
+    th { background:#181c20; color:#19faff; font-weight:900; border-bottom:2px solid #19faff55;}
+    tr { border-bottom: 1px solid #11f3ff23;}
+    .checkbox { transform: scale(1.3); accent-color:#1af6ff; }
+    .input, select { font-size:1.02rem; padding:6px 12px; border-radius:7px; border:1px solid #1af6ff88; background:#161c21; color:#1af6ff;}
+    .input:focus, select:focus { outline:none; border:2px solid #1af6ff; }
+    .flex { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .form-row { margin-bottom:12px; }
+    .add-btn { background: #2fd1e8; color: #181c20; font-weight: bold; border-radius:8px; border:none; padding:7px 14px; cursor:pointer;}
+    .del-btn { background: #ff7b7b; color: #fff; border-radius:8px; border:none; padding:7px 13px; margin-left:5px; cursor:pointer;}
+    .calendar-btn { background:#333d; color:#fff; font-weight:bold; border:none; border-radius:8px; padding:7px 13px; margin-left:4px; cursor:pointer;}
+    @media (max-width:600px) { .container{padding:7vw 2vw 7vw 2vw;} table,th,td{font-size:0.96em;} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back-link" href="{{ url_for('calendar') }}">← 달력으로</a>
+    <h2>참여 관리</h2>
+    <form method="get" action="{{ url_for('attendance_manage') }}">
+      <div class="date-select flex form-row">
+        <label>날짜: <input class="input" type="date" name="date" value="{{ date }}" required></label>
+        <button class="calendar-btn" type="submit">이동</button>
+      </div>
+    </form>
+
+    <!-- 일정 등록/수정 폼 -->
+    <form method="post" action="{{ url_for('attendance_manage') }}">
+      <div class="form-row flex">
+        <label>시간 <input class="input" type="time" name="time" value="{{ time }}"></label>
+        <label>보스명 <input class="input" type="text" name="boss" value="{{ boss }}"></label>
+        <button class="add-btn" type="submit" name="action" value="save">저장</button>
+        {% if boss %}
+          <button class="del-btn" type="submit" name="action" value="delete" onclick="return confirm('정말 삭제할까요?');">삭제</button>
+        {% endif %}
+      </div>
+
+      {% if members %}
+      <table>
+        <tr>
+          <th>참여</th>
+          <th>닉네임</th>
+        </tr>
+        {% for m in members %}
+        <tr>
+          <td>
+            <input class="checkbox" type="checkbox" name="participants" value="{{ m['닉네임'] }}"
+            {% if m['닉네임'] in participants %}checked{% endif %}>
+          </td>
+          <td>{{ m['닉네임'] }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% endif %}
+
+      {% if boss %}
+        <input type="hidden" name="date" value="{{ date }}">
+        <input type="hidden" name="time" value="{{ time }}">
+        <input type="hidden" name="boss" value="{{ boss }}">
+      {% endif %}
+    </form>
+  </div>
+</body>
+</html>

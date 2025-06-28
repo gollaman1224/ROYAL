@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>파티 편성</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #181c20 85%, #11151a 100%);
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Orbitron','Malgun Gothic',sans-serif;
+      color: #eaf8ff;
+    }
+    .party-container {
+      max-width: 1050px;
+      margin: 48px auto 0 auto;
+      background: linear-gradient(145deg, #232b34 85%, #181c20 100%);
+      border-radius: 22px;
+      box-shadow: 0 8px 42px #11f3ff77, 0 0 0 2px #1af6ff3f;
+      padding: 40px 30px 38px 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    .party-title {
+      font-size: 2.1rem;
+      color: #1af6ff;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-shadow: 0 0 16px #1af6ff44;
+      margin-bottom: 28px;
+    }
+    .party-actions {
+      margin-bottom: 32px;
+      display: flex;
+      gap: 13px;
+      flex-wrap: wrap;
+    }
+    .party-btn {
+      padding: 11px 23px;
+      font-size: 1.01rem;
+      background: linear-gradient(95deg, #1af6ff 60%, #5a90ff 100%);
+      color: #181c20;
+      border: none;
+      border-radius: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 12px #11f3ff22;
+      transition: box-shadow 0.13s, filter 0.13s;
+      margin-bottom: 3px;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+    .party-btn:hover {
+      box-shadow: 0 0 0 3px #1af6ff, 0 2px 16px #11f3ff77;
+      filter: brightness(1.10);
+      color: #1af6ff;
+      background: #1a2733;
+    }
+    .party-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 28px 36px;
+      margin-bottom: 18px;
+    }
+    .party-block {
+      flex: 1 1 310px;
+      background: rgba(17, 35, 49, 0.93);
+      border-radius: 18px;
+      box-shadow: 0 2px 15px #1af6ff22;
+      min-width: 320px;
+      max-width: 330px;
+      padding: 19px 16px 15px 16px;
+      border: 2px solid #1af6ff18;
+      transition: box-shadow 0.19s;
+      position: relative;
+    }
+    .party-block:hover {
+      box-shadow: 0 0 0 3px #1af6ff, 0 6px 28px #11f6ff88;
+    }
+    .party-header {
+      font-size: 1.16rem;
+      font-weight: 900;
+      color: #1af6ff;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px #1af6ff33;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .party-warning {
+      color: #ff6a91;
+      font-weight: bold;
+      margin-left: 8px;
+      font-size: 0.98rem;
+      display: inline-block;
+    }
+    .party-good {
+      color: #7fffcc;
+      font-weight: bold;
+      margin-left: 8px;
+      font-size: 0.98rem;
+      display: inline-block;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+    th, td {
+      padding: 7px 6px;
+      text-align: center;
+      border-bottom: 1px solid #1af6ff16;
+    }
+    th {
+      background: #1af6ff11;
+      color: #1af6ff;
+      font-weight: 700;
+    }
+    td {
+      color: #eaf8ff;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .select-cell input[type="checkbox"] {
+      transform: scale(1.2);
+      accent-color: #1af6ff;
+      cursor: pointer;
+    }
+    @media (max-width: 1100px) {
+      .party-list { flex-direction: column; gap: 17px 0; }
+      .party-block { min-width: 0; max-width: 100vw; }
+    }
+    @media (max-width: 600px) {
+      .party-container { padding: 2vw 0 9vw 0; }
+      .party-title { font-size: 1.2rem; }
+    }
+    #swap-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 22px;
+      background: #1af6ff;
+      color: #181c20;
+      border: none;
+      padding: 13px 29px;
+      font-weight: 900;
+      cursor: pointer;
+      border-radius: 12px;
+      font-size: 1.04rem;
+      box-shadow: 0 4px 20px #1af6ff99;
+      z-index: 9999;
+      transition: filter 0.17s;
+    }
+    #swap-btn:disabled {
+      background: #223b4c;
+      color: #88dbff;
+      cursor: not-allowed;
+      filter: grayscale(0.6) brightness(0.87);
+    }
+  </style>
+</head>
+<body>
+  <div class="party-container">
+    <div class="party-title">파티 편성 & 멤버 교체</div>
+    <div class="party-actions">
+      <form method="get" action="{{ url_for('reset_parties') }}">
+        <button type="submit" class="party-btn">자동 파티 재편성</button>
+      </form>
+      <a href="{{ url_for('index') }}" class="party-btn">멤버 리스트</a>
+      <a href="{{ url_for('dashboard') }}" class="party-btn">대시보드</a>
+    </div>
+    <form id="swap-form" method="POST" action="{{ url_for('swap_members') }}">
+      <div class="party-list">
+        {% for party in parties %}
+        {% set idx = loop.index0 %}
+        {% set tanks = party | selectattr('직업', 'in', ['뱅가드', '버서커']) | list %}
+        {% set heals = party | selectattr('직업', 'equalto', '디바인캐스터') | list %}
+        {% set dps = party | selectattr('직업', 'in', ['디스트로이어','나이트레인져','엘리멘탈','데스브링어']) | list %}
+        {% set burst = party | selectattr('직업', 'equalto', '어쌔신') | list %}
+        {% set legend_heal = heals | selectattr('전설스킬', 'equalto', '있음') | list %}
+        {% set compass_count = party | selectattr('나침반', 'equalto', 'O') | list | length %}
+        {% set myth_sum = party | map(attribute='신화개수') | sum %}
+        {% set warnings = [] %}
+        {% if not tanks %} {% set _ = warnings.append("탱커 없음") %} {% endif %}
+        {% if not heals %} {% set _ = warnings.append("힐러 없음") %} {% endif %}
+        {% if not burst %} {% set _ = warnings.append("극딜러 없음") %} {% endif %}
+        {% if legend_heal|length == 0 %} {% set _ = warnings.append("전설스킬 힐러 없음") %} {% endif %}
+        {% if compass_count < party|length %} {% set _ = warnings.append("나침반 미달(" ~ compass_count ~ "/" ~ party|length ~ ")") %} {% endif %}
+        {% if myth_sum < 10 %} {% set _ = warnings.append("신화합계 10 미만(" ~ myth_sum ~ ")") %} {% endif %}
+        <div class="party-block" data-party="{{ idx+1 }}">
+          <div class="party-header">
+            {% set party_icon = "🛡️" %}
+            {% if tanks|length >= 2 and heals %}{% set party_icon = "💎" %}
+            {% elif heals %}{% set party_icon = "💖" %}
+            {% elif burst %}{% set party_icon = "⚡" %}
+            {% elif dps %}{% set party_icon = "🗡️" %}
+            {% endif %}
+            <span>{{ party_icon }}</span>
+            {{ idx+1 }} 파티
+            {% if warnings %}
+              <span class="party-warning">⚠️ {{ warnings | join(', ') }}</span>
+            {% else %}
+              <span class="party-good">✅ 모든 조건 충족</span>
+            {% endif %}
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>선택</th>
+                <th>닉네임 / 캐릭터명</th>
+                <th>직업</th>
+                <th>신화개수</th>
+                <th>전설스킬</th>
+                <th>나침반</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for member in party %}
+              <tr>
+                <td class="select-cell">
+                  <input type="checkbox" name="selected_members" value="{{ member['닉네임'] }}" class="member-checkbox" />
+                </td>
+                <td>
+                  {% set full_name = member['닉네임'] %}
+                  {% set name_part = full_name.split('(')[0] %}
+                  {% set char_part = '' %}
+                  {% if '(' in full_name and ')' in full_name %}
+                    {% set char_part = full_name.split('(')[1].rstrip(')') %}
+                  {% endif %}
+                  <span style="font-weight:bold;">{{ name_part }}</span>
+                  {% if char_part %}
+                    <br />
+                    <span style="font-size:0.87em; color:#1af6ff;">{{ char_part }}</span>
+                  {% endif %}
+                  <!-- 직업별 이모티콘 -->
+                  {% if member['직업'] == "뱅가드" %} 🛡️
+                  {% elif member['직업'] == "버서커" %} 🪓
+                  {% elif member['직업'] == "나이트레인져" %} 🏹
+                  {% elif member['직업'] == "어쌔신" %} ⚔️
+                  {% elif member['직업'] == "디바인캐스터" %} 💖
+                  {% elif member['직업'] == "엘리멘탈" %} 🔥
+                  {% elif member['직업'] == "데스브링어" %} ☠️
+                  {% elif member['직업'] == "디스트로이어" %} 🎯
+                  {% endif %}
+                </td>
+                <td style="font-weight:700; color: {{ job_colors.get(member['직업'], '#6ef') }}; font-size:14px;">
+                  {{ member['직업'] }}
+                </td>
+                <td>{{ member['신화개수'] }}</td>
+                <td>
+                  {% if member.get('전설스킬', '없음') == '있음' %}✔️{% else %}✘{% endif %}
+                </td>
+                <td>
+                  {% if member.get('나침반', '') == 'O' %}✔️{% else %}✘{% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="nick1" id="nick1" />
+      <input type="hidden" name="nick2" id="nick2" />
+      <button type="submit" id="swap-btn" disabled>선택 멤버 교체</button>
+    </form>
+  </div>
+  <script>
+    const checkboxes = document.querySelectorAll('.member-checkbox');
+    const swapBtn = document.getElementById('swap-btn');
+    const nick1Input = document.getElementById('nick1');
+    const nick2Input = document.getElementById('nick2');
+    function updateSelection() {
+      const checked = [...checkboxes].filter(cb => cb.checked);
+      if (checked.length === 2) {
+        swapBtn.disabled = false;
+        nick1Input.value = checked[0].value;
+        nick2Input.value = checked[1].value;
+      } else {
+        swapBtn.disabled = true;
+        nick1Input.value = '';
+        nick2Input.value = '';
+      }
+    }
+    checkboxes.forEach(cb => cb.addEventListener('change', () => {
+      const checked = [...checkboxes].filter(cb => cb.checked);
+      if (checked.length > 2) {
+        cb.checked = false;
+        alert('멤버는 2명까지만 선택 가능합니다.');
+      }
+      updateSelection();
+    }));
+  </script>
+</body>
+</html>
