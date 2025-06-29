@@ -1,6 +1,3 @@
-echo attendance.json > .gitignore
-echo members.json >> .gitignore
-echo schedule.json >> .gitignore
-echo __pycache__/ >> .gitignore
-echo *.pyc >> .gitignore
-echo .env >> .gitignore
+attendance.json
+members.json
+schedule.json
