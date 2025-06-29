@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ boss_name }} 참여자 명단</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #181c20;
+      color: #eaf8ff;
+      font-family: 'Orbitron', 'Malgun Gothic', sans-serif;
+      margin: 0; padding: 0;
+    }
+    .container {
+      max-width: 820px;
+      margin: 36px auto 0 auto;
+      background: linear-gradient(145deg, #232930 85%, #181c20 100%);
+      border-radius: 24px;
+      box-shadow: 0 8px 42px #11f3ff77, 0 0 0 2px #1af6ff3f;
+      padding: 38px 30px 40px 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    .nav-links {
+      margin-bottom: 30px;
+      display: flex;
+      gap: 12px 16px;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      display: inline-block;
+      font-weight: 700;
+      color: #1af6ff;
+      text-decoration: none;
+      padding: 9px 22px;
+      border: 2px solid #1af6ff;
+      border-radius: 13px;
+      transition: background 0.23s, color 0.23s;
+      background: rgba(17,243,255,0.07);
+      font-size: 1.06rem;
+      letter-spacing: 0.2px;
+      box-shadow: 0 0 10px #1af6ff22;
+    }
+    .nav-link:hover {
+      background: #1af6ff;
+      color: #181c20;
+      text-shadow: 0 0 7px #fff;
+    }
+    .title {
+      font-size: 1.9rem;
+      color: #1af6ff;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-shadow: 0 0 16px #1af6ff44;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+    .group-title {
+      margin-top: 32px;
+      font-size: 1.13rem;
+      color: #1af6ff;
+      font-weight: 900;
+      letter-spacing: 0.7px;
+      text-shadow: 0 0 8px #1af6ff44;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    table {
+      width: 100%;
+      background: rgba(24,28,32,0.94);
+      border-radius: 18px;
+      border-collapse: collapse;
+      margin-bottom: 27px;
+      font-size: 1rem;
+      box-shadow: 0 0 14px #1af6ff33;
+    }
+    th, td {
+      padding: 9px 7px;
+      text-align: center;
+      border-bottom: 1px solid #1af6ff18;
+      font-size: 1rem;
+    }
+    th {
+      background: #1af6ff10;
+      color: #1af6ff;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+    }
+    td {
+      color: #eaf8ff;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .no-participant {
+      color: #b9e2ee;
+      font-size: 1.13em;
+      text-align: center;
+      font-style: italic;
+      margin-top: 34px;
+      font-weight: 900;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 네비게이션 버튼 영역 추가 -->
+    <div class="nav-links">
+      <a href="{{ url_for('index') }}" class="nav-link">길드원 목록</a>
+      <a href="{{ url_for('party') }}" class="nav-link">파티 매칭</a>
+      <a href="{{ url_for('distribute') }}" class="nav-link">분배 배정</a>
+      <a href="{{ url_for('dashboard') }}" class="nav-link">대시보드</a>
+    </div>
+    <div class="title">{{ boss_name }} 참여자 명단</div>
+    {% set job_emojis = {
+        "뱅가드": "🛡️", "버서커": "🪓", "나이트레인져": "🏹", "어쌔신": "⚔️",
+        "디바인캐스터": "💖", "엘리멘탈": "🔥", "데스브링어": "☠️", "디스트로이어": "🎯"
+    } %}
+    {% set job_order = ["뱅가드", "버서커", "나이트레인져", "어쌔신", "디바인캐스터", "엘리멘탈", "데스브링어", "디스트로이어", "기타"] %}
+    {% set grouped = {} %}
+    {% for job in job_order %}
+      {% set _ = grouped.update({job: []}) %}
+    {% endfor %}
+    {% for m in members %}
+      {% if m['닉네임'] in participants %}
+        {% set job = m['직업'] if m['직업'] in job_order else "기타" %}
+        {% set _ = grouped[job].append(m) %}
+      {% endif %}
+    {% endfor %}
+    {% set shown = 0 %}
+    {% for job in job_order %}
+      {% if grouped[job] and grouped[job]|length > 0 %}
+        <div class="group-title">
+          <span>{{ job_emojis.get(job, "✨") }}</span>
+          {{ job }} <span style="color:#73fbfc;">({{ grouped[job]|length }}명)</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>닉네임</th>
+              <th>신화개수</th>
+              <th>나침반</th>
+              <th>전설스킬</th>
+              <th>서버</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for member in grouped[job] %}
+            <tr>
+              <td>
+                {{ member['닉네임'] }}
+                {% if job_emojis[member['직업']] %} {{ job_emojis[member['직업']] }}{% endif %}
+              </td>
+              <td>{{ member['신화개수'] }}</td>
+              <td>{% if member['나침반']=='O' %}✔️{% else %}✘{% endif %}</td>
+              <td>{% if member['전설스킬']=='있음' %}✔️{% else %}✘{% endif %}</td>
+              <td>{{ member['서버'] }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% set shown = shown + grouped[job]|length %}
+      {% endif %}
+    {% endfor %}
+    {% if shown == 0 %}
+      <div class="no-participant">참여자가 없습니다.</div>
+    {% endif %}
+  </div>
+</body>
+</html>

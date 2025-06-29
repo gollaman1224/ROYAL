@@ -13,12 +13,12 @@
       color: #eaf8ff;
     }
     .server-container {
-      max-width: 1150px;
+      max-width: 1380px;   /* ★ 넉넉하게 넓힘 */
       margin: 42px auto 0 auto;
       background: linear-gradient(145deg, #232b34 85%, #181c20 100%);
       border-radius: 22px;
       box-shadow: 0 8px 48px #11f3ff77, 0 0 0 2px #1af6ff3f;
-      padding: 38px 18px 30px 18px;
+      padding: 38px 28px 40px 28px;   /* 더 넉넉하게 */
       position: relative;
       overflow: hidden;
     }
@@ -60,16 +60,18 @@
     }
     .server-list {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
-      gap: 32px 22px;
+      grid-template-columns: repeat(3, 1fr);  /* 항상 3개 */
+      gap: 38px 36px;                        /* 카드 간격 크게 */
       margin-top: 10px;
+      justify-items: stretch;
+      align-items: start;
     }
     .server-block {
-      background: rgba(17, 35, 49, 0.95);
-      border-radius: 15px;
+      background: rgba(17, 35, 49, 0.98);
+      border-radius: 18px;
       box-shadow: 0 2px 18px #1af6ff22;
       border: 2px solid #1af6ff18;
-      padding: 16px 10px 14px 10px;
+      padding: 18px 15px 17px 15px;
       transition: box-shadow 0.14s;
       min-width: 0;
       position: relative;
@@ -78,36 +80,36 @@
       box-shadow: 0 0 0 2.5px #1af6ff, 0 4px 32px #11f3ffaa;
     }
     .server-header {
-      font-size: 1.15rem;
+      font-size: 1.22rem;
       font-weight: 900;
       color: #1af6ff;
-      margin-bottom: 11px;
+      margin-bottom: 13px;
       text-shadow: 0 0 8px #1af6ff22;
       text-align: center;
-      letter-spacing: 1.2px;
+      letter-spacing: 1.3px;
     }
     .server-warning {
       color: #ff6a91;
       font-weight: 800;
-      font-size: 1.01rem;
+      font-size: 1.05rem;
       display: block;
-      margin-bottom: 6px;
+      margin-bottom: 9px;
       text-align: center;
       letter-spacing: 0.6px;
     }
     .server-good {
       color: #7fffcc;
       font-weight: 800;
-      font-size: 1.01rem;
+      font-size: 1.03rem;
       display: block;
-      margin-bottom: 6px;
+      margin-bottom: 9px;
       text-align: center;
       letter-spacing: 0.6px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.97rem;
+      font-size: 1.02rem;
       background: transparent;
       margin-bottom: 8px;
       border-radius: 13px;
@@ -115,7 +117,7 @@
       table-layout: fixed;
     }
     th, td {
-      padding: 7px 3px;
+      padding: 8px 3px;
       text-align: center;
       border-bottom: 1px solid #1af6ff14;
       overflow: hidden;
@@ -127,11 +129,11 @@
       color: #1af6ff;
       font-weight: 800;
       letter-spacing: 1px;
-      font-size: 0.97em;
+      font-size: 1em;
     }
     td {
       color: #eaf8ff;
-      font-size: 0.97em;
+      font-size: 1em;
     }
     tr:last-child td {
       border-bottom: none;
@@ -162,17 +164,22 @@
       border: 1.6px solid #1af6ffcc;
       outline: none;
     }
-    /* 직업별 이모티콘 */
     .job-icon { font-size: 1.08em; margin-right: 2.5px; vertical-align: -2px;}
+    @media (max-width: 1600px) {
+      .server-container { max-width: 100vw; }
+    }
     @media (max-width: 1100px) {
       .server-container { padding: 8px 0 10vw 0; }
       .server-title { font-size: 1.32rem; }
-      .server-list { grid-template-columns: 1fr; }
+      .server-list { grid-template-columns: 1fr 1fr; gap: 32px 18px;}
+    }
+    @media (max-width: 900px) {
+      .server-list { grid-template-columns: 1fr; gap: 22px 0;}
     }
     @media (max-width: 700px) {
       .server-container { padding: 1vw 1vw 11vw 1vw; }
       .server-title { font-size: 1.08rem; }
-      table, th, td { font-size: 0.92em; }
+      table, th, td { font-size: 0.95em; }
     }
   </style>
 </head>

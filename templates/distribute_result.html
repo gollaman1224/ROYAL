@@ -181,7 +181,7 @@
       <b>인원별 기본 몫:</b> <span style="color:#fdffbc;">{{ result.shared }}</span>
     </div>
     
-    {# ---- 힐러 구역 ---- #}
+    <!-- 힐러 구역 -->
     <div class="result-section healer">
       <div class="result-section-label">힐러 (Healer)</div>
       <table>
@@ -198,7 +198,12 @@
         </thead>
         <tbody>
           {% set healer_list = result.members | selectattr('직업', 'equalto', '디바인캐스터') | sort(attribute='신화개수', reverse=True) | list %}
-          {% set max_pay = healer_list | map(attribute='분배금') | max %}
+          {% set healer_pay_list = healer_list | map(attribute='분배금') | list %}
+          {% if healer_pay_list|length == 0 %}
+            {% set max_pay = 0 %}
+          {% else %}
+            {% set max_pay = healer_pay_list | max %}
+          {% endif %}
           {% for m in healer_list %}
           <tr class="healer-row{% if m['분배금'] == max_pay %} highlight{% endif %}">
             <td>{{ m['닉네임'] }}</td>
@@ -214,7 +219,7 @@
       </table>
     </div>
 
-    {# ---- 일반구역 ---- #}
+    <!-- 일반구역 -->
     <div class="result-section others">
       <div class="result-section-label others">일반</div>
       <table>
@@ -231,7 +236,12 @@
         </thead>
         <tbody>
           {% set others_list = result.members | rejectattr('직업', 'equalto', '디바인캐스터') | sort(attribute='신화개수', reverse=True) | list %}
-          {% set max_pay_others = others_list | map(attribute='분배금') | max %}
+          {% set others_pay_list = others_list | map(attribute='분배금') | list %}
+          {% if others_pay_list|length == 0 %}
+            {% set max_pay_others = 0 %}
+          {% else %}
+            {% set max_pay_others = others_pay_list | max %}
+          {% endif %}
           {% for m in others_list %}
           <tr class="
             {% if m['직업']=='디바인캐스터' %}healer-row{% elif m['직업'] in ['뱅가드','버서커'] %}tank-row

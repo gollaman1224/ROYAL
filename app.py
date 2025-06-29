@@ -1,7 +1,7 @@
 import json
 import os
 import datetime
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 from collections import defaultdict, Counter
 from functools import wraps
 import re
@@ -21,9 +21,7 @@ def normalize_boss_name(boss):
     if not boss:
         return ""
     s = str(boss).replace(" ", "").replace("-", "").replace("_", "").lower()
-    # "어비스 3층", "어비스3층", "어비스3 층" 등 → "어비스3층"
     s = re.sub(r"(어비스|abys?)[\s\-]*([0-9]+)[\s\-]*(층|f)?", lambda m: f"어비스{m.group(2)}층", s)
-    # 필요하면 추가 규칙 더 넣기
     return s
 
 # -------------------- 로그인 --------------------
@@ -393,6 +391,42 @@ def attendance_manage():
         participants=participants
     )
 
+# -------------------- **[참여자 명단 팝업/새 창 라우트]** --------------------
+@app.route("/attendance/participants")
+@login_required
+def attendance_participants():
+    date = request.args.get("date")
+    time = request.args.get("time")
+    boss = request.args.get("boss")
+    if not date or not time or not boss:
+        return "필수 값 누락", 400
+
+    attendance = load_json(ATTENDANCE_FILE, [])
+    boss_norm = normalize_boss_name(boss)
+    record = next(
+        (a for a in attendance if a["date"] == date and a["time"] == time and normalize_boss_name(a["boss"]) == boss_norm),
+        None,
+    )
+    members = load_members()  # ← 반드시 추가!
+
+    if not record:
+        return render_template(
+            "attendance_participants.html",
+            boss_name=boss,
+            date=date,
+            time=time,
+            members=members,       # ← 반드시 넘기기
+            participants=[],
+        )
+    return render_template(
+        "attendance_participants.html",
+        boss_name=boss,
+        date=date,
+        time=time,
+        members=members,          # ← 반드시 넘기기
+        participants=record["participants"],
+    )
+
 # -------------------- 랭킹 (주간/월간, 보스별) --------------------
 def get_ranking(start_date, end_date, bosses=None):
     attendance = load_json(ATTENDANCE_FILE, [])
@@ -471,17 +505,68 @@ def distribute():
 @app.route("/distribute_result", methods=["POST"])
 @login_required
 def distribute_result():
-    form_data = request.form
-    # 실제 분배 로직 필요시 여기에 작성
-    return render_template("distribute_result.html", data=form_data)
-from flask import send_file  # 파일 다운로드용 import
+    members = load_members()  # 전체 멤버 불러오기
 
-# 중간에 적절한 위치에 추가 (예: 다른 route들 아래)
+    # 폼에서 참석 체크된 닉네임만 추림
+    attend_nicks = request.form.getlist("attend")
+    item_dia = int(request.form.get("item_dia", 0))
+    strong_dia = int(request.form.get("strong_dia", 0))
+    healer_bonus = int(request.form.get("heal_bonus", 0))
+    myth_unit = int(request.form.get("myth_unit", 0))
+
+    # 분배 대상 멤버만 추림
+    target_members = []
+    for m in members:
+        if m["닉네임"] not in attend_nicks:
+            continue
+        # 힐러추가, 신화추가, 기부/감액은 폼에서 받아옴
+        healer_extra = int(request.form.get(f"healer_bonus_{m['닉네임']}", 0))
+        myth_extra = int(request.form.get(f"myth_bonus_{m['닉네임']}", 0))
+        donation = int(request.form.get(f"donation_{m['닉네임']}", 0))
+        # 신화개수는 기본 멤버정보 사용
+        myth_count = int(m.get("신화개수", 0))
+        is_healer = m["직업"] == "디바인캐스터"
+        target_members.append({
+            "닉네임": m["닉네임"],
+            "직업": m["직업"],
+            "신화개수": myth_count,
+            "힐러추가": healer_extra if is_healer else 0,
+            "신화추가": myth_extra,
+            "기부": donation,
+        })
+
+    n = len(target_members)
+    # 기본 몫 계산
+    total_dia = item_dia + strong_dia
+    total_healer = sum(x["힐러추가"] for x in target_members)
+    total_myth = sum(x["신화추가"] for x in target_members)
+    total_donation = sum(x["기부"] for x in target_members)
+    base_share = 0
+    if n > 0:
+        base_share = (total_dia - total_healer - total_myth + total_donation) // n
+
+    # 최종 분배금 계산
+    for m in target_members:
+        m["분배금"] = base_share + m["힐러추가"] + m["신화추가"] - m["기부"]
+
+    # 미참석자
+    missed = [m["닉네임"] for m in members if m["닉네임"] not in attend_nicks]
+
+    result = {
+        "members": target_members,
+        "total": total_dia,
+        "shared": base_share,
+        "strong_dia": strong_dia,
+        "healer_bonus": healer_bonus,
+        "myth_unit": myth_unit,
+        "missed": missed,
+    }
+    return render_template("distribute_result.html", result=result)
+
 @app.route("/download/attendance")
 @login_required
 def download_attendance():
     return send_file(ATTENDANCE_FILE, as_attachment=True)
-
 
 # -----------------------------------------------------------
 if __name__ == "__main__":

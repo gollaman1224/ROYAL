@@ -4,222 +4,33 @@
   <meta charset="UTF-8" />
   <title>길드 다야 분배</title>
   <style>
-    body {
-      background: #16191d;
-      color: #eee;
-      font-family: 'Orbitron', 'Malgun Gothic', monospace; 
-      margin: 0; padding: 0;
-    }
-    .container {
-      max-width: 960px;
-      margin: 32px auto;
-      background: #23252a;
-      padding: 24px 32px 32px 32px;
-      border-radius: 18px;
-      box-shadow: 0 6px 32px #0007;
-    }
-    .guild-link {
-      display: inline-block;
-      margin-bottom: 30px;
-      margin-top: 4px;
-      font-weight: 900;
-      font-size: 20px;
-      color: #19fff5;
-      text-shadow: 0 0 10px #0ff9, 0 0 24px #19fff533;
-      text-decoration: none;
-      padding: 8px 34px 8px 22px;
-      border-radius: 999px;
-      border: none;
-      background: linear-gradient(90deg, #0ff3 0%, #222c 60%, #19fff5 100%);
-      box-shadow: 0 2px 14px #0ff4;
-      transition: background 0.23s, color 0.23s, box-shadow 0.23s;
-      position: relative;
-      letter-spacing: 0.5px;
-      z-index: 9;
-    }
-    .guild-link:hover {
-      background: linear-gradient(90deg, #0ff 0%, #19fff5 100%);
-      color: #0a2129;
-      box-shadow: 0 4px 20px #19fff555;
-      text-shadow: 0 0 20px #fff;
-    }
-    .guild-link::before {
-      content: "←";
-      font-size: 22px;
-      font-weight: 900;
-      color: #15e7df;
-      margin-right: 9px;
-      filter: drop-shadow(0 0 4px #0ff);
-      position: relative;
-      top: 2px;
-    }
-    h1 { 
-      color: #0ff; 
-      margin-bottom: 22px; 
-      text-shadow: 0 0 8px #099, 0 0 40px #00ffd944;
-      font-size: 2.4rem;
-      letter-spacing: 1.5px;
-      font-weight: 900;
-      text-align: left;
-    }
-    .top-fields {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 18px;
-      flex-wrap: wrap;
-      align-items: flex-end;
-    }
-    .top-fields label {
-      flex: 1 1 220px;
-      min-width: 180px;
-      max-width: 270px;
-      font-size: 1em;
-      font-weight: 700;
-      color: #8ff;
-      margin-right: 0;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      white-space: nowrap;
-    }
-    .top-fields input[type="number"] {
-      flex: 1 1 0;
-      min-width: 0;
-      width: 100%;
-      background: #191b20;
-      border: 1px solid #2cf;
-      color: #fff;
-      font-size: 1.07em;
-      padding: 4px 13px;
-      border-radius: 6px;
-      margin-left: 12px;
-      margin-right: 0;
-      margin-bottom: 0;
-      box-sizing: border-box;
-      transition: border 0.18s, box-shadow 0.18s;
-      text-align: left;
-    }
-    .top-fields input[type="number"]:focus {
-      outline: none;
-      border: 1.5px solid #0ff;
-      box-shadow: 0 0 8px #00ffe9bb;
-    }
-    .attend-controls {
-      margin-bottom: 10px;
-      font-size: 0.97em;
-      color: #99e;
-    }
-    .attend-controls button {
-      margin-right: 8px;
-      background: #232c32;
-      color: #0ff;
-      border: 1px solid #399;
-      border-radius: 6px;
-      font-weight: 700;
-      padding: 4px 15px;
-      font-size: 1.03em;
-      cursor: pointer;
-      transition: background 0.18s, color 0.18s, box-shadow 0.18s;
-      box-shadow: 0 1px 8px #00ffd929;
-    }
-    .attend-controls button:hover {
-      background: #2cf;
-      color: #101b24;
-      box-shadow: 0 1px 15px #00ffd977;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #23252a;
-      margin-bottom: 18px;
-      box-shadow: 0 1px 16px #2229;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    th, td {
-      padding: 9px 8px;
-      border: 1px solid #333b44;
-      text-align: center;
-      font-size: 1em;
-      word-break: keep-all;
-      transition: background 0.18s, color 0.18s;
-    }
-    th {
-      background: linear-gradient(90deg, #21cfd8 0%, #0ff 100%);
-      color: #23252a;
-      font-size: 1.09em;
-      font-weight: 900;
-      letter-spacing: 1px;
-      border-bottom: 2px solid #0ff;
-      text-shadow: 0 0 12px #00f7ff;
-    }
-    tr.healer-row td {
-      background: #162c41 !important;
-      color: #55e0ff !important;
-      font-weight: 800;
-      letter-spacing: 0.2px;
-    }
-    tr.dps-row td {
-      color: #ffe18a !important;
-      font-weight: 600;
-    }
-    tr.tank-row td {
-      color: #ffb1b1 !important;
-      font-weight: 700;
-    }
-    tr.selected td {
-      background: #293b2a !important;
-      color: #fff800 !important;
-    }
-    input[type="number"]:not(.top-fields input) {
-      width: 60px;
-      background: #222;
-      border: 1px solid #555;
-      color: #fff;
-      border-radius: 6px;
-      padding: 4px;
-      text-align: right;
-      font-size: 1em;
-      transition: border 0.17s;
-    }
-    input[type="number"]:focus {
-      outline: none;
-      border: 1.5px solid #0ff;
-      box-shadow: 0 0 6px #19fff5aa;
-    }
-    input[type="checkbox"] {
-      transform: scale(1.17);
-      accent-color: #19fff5;
-    }
-    .submit-btn {
-      width: 100%;
-      background: linear-gradient(90deg, #0ff 0%, #19fff5 100%);
-      color: #16191d;
-      font-size: 1.18em;
-      font-weight: 900;
-      padding: 13px 0 12px 0;
-      margin-top: 14px;
-      border: none;
-      border-radius: 11px;
-      cursor: pointer;
-      box-shadow: 0 2px 18px #19fff555;
-      transition: background 0.19s, color 0.19s, box-shadow 0.18s;
-      letter-spacing: 1px;
-    }
-    .submit-btn:hover {
-      background: linear-gradient(90deg, #19fff5 0%, #0ff 100%);
-      color: #001112;
-      box-shadow: 0 6px 22px #19fff566;
-    }
+    body { background: #16191d; color: #eee; font-family: 'Orbitron', 'Malgun Gothic', monospace; margin: 0; padding: 0; }
+    .container { max-width: 960px; margin: 32px auto; background: #23252a; padding: 24px 32px 32px 32px; border-radius: 18px; box-shadow: 0 6px 32px #0007; }
+    .guild-link { display: inline-block; margin-bottom: 30px; margin-top: 4px; font-weight: 900; font-size: 20px; color: #19fff5; text-shadow: 0 0 10px #0ff9, 0 0 24px #19fff533; text-decoration: none; padding: 8px 34px 8px 22px; border-radius: 999px; border: none; background: linear-gradient(90deg, #0ff3 0%, #222c 60%, #19fff5 100%); box-shadow: 0 2px 14px #0ff4; transition: background 0.23s, color 0.23s, box-shadow 0.23s; position: relative; letter-spacing: 0.5px; z-index: 9; }
+    .guild-link:hover { background: linear-gradient(90deg, #0ff 0%, #19fff5 100%); color: #0a2129; box-shadow: 0 4px 20px #19fff555; text-shadow: 0 0 20px #fff; }
+    .guild-link::before { content: "←"; font-size: 22px; font-weight: 900; color: #15e7df; margin-right: 9px; filter: drop-shadow(0 0 4px #0ff); position: relative; top: 2px; }
+    h1 { color: #0ff; margin-bottom: 22px; text-shadow: 0 0 8px #099, 0 0 40px #00ffd944; font-size: 2.4rem; letter-spacing: 1.5px; font-weight: 900; text-align: left; }
+    .top-fields { display: flex; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; align-items: flex-end; }
+    .top-fields label { flex: 1 1 220px; min-width: 180px; max-width: 270px; font-size: 1em; font-weight: 700; color: #8ff; margin-right: 0; letter-spacing: 0.5px; display: flex; align-items: center; white-space: nowrap; }
+    .top-fields input[type="number"] { flex: 1 1 0; min-width: 0; width: 100%; background: #191b20; border: 1px solid #2cf; color: #fff; font-size: 1.07em; padding: 4px 13px; border-radius: 6px; margin-left: 12px; margin-right: 0; margin-bottom: 0; box-sizing: border-box; transition: border 0.18s, box-shadow 0.18s; text-align: left; }
+    .top-fields input[type="number"]:focus { outline: none; border: 1.5px solid #0ff; box-shadow: 0 0 8px #00ffe9bb; }
+    .attend-controls { margin-bottom: 10px; font-size: 0.97em; color: #99e; }
+    .attend-controls button { margin-right: 8px; background: #232c32; color: #0ff; border: 1px solid #399; border-radius: 6px; font-weight: 700; padding: 4px 15px; font-size: 1.03em; cursor: pointer; transition: background 0.18s, color 0.18s, box-shadow 0.18s; box-shadow: 0 1px 8px #00ffd929; }
+    .attend-controls button:hover { background: #2cf; color: #101b24; box-shadow: 0 1px 15px #00ffd977; }
+    table { width: 100%; border-collapse: collapse; background: #23252a; margin-bottom: 18px; box-shadow: 0 1px 16px #2229; border-radius: 10px; overflow: hidden; }
+    th, td { padding: 9px 8px; border: 1px solid #333b44; text-align: center; font-size: 1em; word-break: keep-all; transition: background 0.18s, color 0.18s; }
+    th { background: linear-gradient(90deg, #21cfd8 0%, #0ff 100%); color: #23252a; font-size: 1.09em; font-weight: 900; letter-spacing: 1px; border-bottom: 2px solid #0ff; text-shadow: 0 0 12px #00f7ff; }
+    tr.healer-row td { background: #162c41 !important; color: #55e0ff !important; font-weight: 800; letter-spacing: 0.2px; }
+    tr.dps-row td { color: #ffe18a !important; font-weight: 600; }
+    tr.tank-row td { color: #ffb1b1 !important; font-weight: 700; }
+    tr.selected td { background: #293b2a !important; color: #fff800 !important; }
+    input[type="number"]:not(.top-fields input) { width: 60px; background: #222; border: 1px solid #555; color: #fff; border-radius: 6px; padding: 4px; text-align: right; font-size: 1em; transition: border 0.17s; }
+    input[type="number"]:focus { outline: none; border: 1.5px solid #0ff; box-shadow: 0 0 6px #19fff5aa; }
+    input[type="checkbox"] { transform: scale(1.17); accent-color: #19fff5; }
+    .submit-btn { width: 100%; background: linear-gradient(90deg, #0ff 0%, #19fff5 100%); color: #16191d; font-size: 1.18em; font-weight: 900; padding: 13px 0 12px 0; margin-top: 14px; border: none; border-radius: 11px; cursor: pointer; box-shadow: 0 2px 18px #19fff555; transition: background 0.19s, color 0.19s, box-shadow 0.18s; letter-spacing: 1px; }
+    .submit-btn:hover { background: linear-gradient(90deg, #19fff5 0%, #0ff 100%); color: #001112; box-shadow: 0 6px 22px #19fff566; }
     .error { color: #ff6464; font-weight: 700; margin-bottom: 18px; }
-    @media (max-width: 650px) {
-      .container { padding: 10px 3px; }
-      .top-fields, .attend-controls { flex-direction: column; gap: 3px; }
-      table, th, td { font-size: 0.95em; }
-      .guild-link { font-size: 15px; padding: 7px 15px 7px 12px; }
-      .top-fields label { max-width: 100%; }
-      .top-fields input[type="number"] { min-width: 0; }
-    }
+    @media (max-width: 650px) { .container { padding: 10px 3px; } .top-fields, .attend-controls { flex-direction: column; gap: 3px; } table, th, td { font-size: 0.95em; } .guild-link { font-size: 15px; padding: 7px 15px 7px 12px; } .top-fields label { max-width: 100%; } .top-fields input[type="number"] { min-width: 0; } }
   </style>
 </head>
 <body>
@@ -233,16 +44,16 @@
     <form method="POST" action="{{ url_for('distribute_result') }}" autocomplete="off" target="_blank">
       <div class="top-fields">
         <label>아이템 다야:
-          <input type="number" name="item_dia" value="{{ result.item_dia if result else '' }}" required min="0">
+          <input type="number" name="item_dia" id="item_dia" value="{{ request.form.item_dia or '' }}" required min="0">
         </label>
         <label>성채 다야:
-          <input type="number" name="strong_dia" value="0" min="0">
+          <input type="number" name="strong_dia" id="strong_dia" value="{{ request.form.strong_dia or '0' }}" min="0">
         </label>
         <label>힐러 추가금:
-          <input type="number" name="heal_bonus" value="{{ result.healer_bonus if result else '3000' }}" min="0">
+          <input type="number" name="heal_bonus" id="heal_bonus" value="{{ request.form.heal_bonus or '3000' }}" min="0">
         </label>
         <label>신화 개당 추가금:
-          <input type="number" name="myth_unit" value="{{ result.myth_unit if result else '1500' }}" min="0">
+          <input type="number" name="myth_unit" id="myth_unit" value="{{ request.form.myth_unit or '1500' }}" min="0">
         </label>
       </div>
       <div class="attend-controls">
@@ -263,26 +74,25 @@
         </thead>
         <tbody>
           {% for m in members %}
-          <tr class="{% if m['직업']=='디바인캐스터' %}healer-row{% elif m['직업'] in ['뱅가드','버서커'] %}tank-row{% elif m['직업'] in ['엘리멘탈','데스브링어','디스트로이어','나이트레인져','어쌔신'] %}dps-row{% endif %}">
+          <tr class="{% if m.직업 == '디바인캐스터' %}healer-row{% elif m.직업 in ['뱅가드','버서커'] %}tank-row{% elif m.직업 in ['엘리멘탈','데스브링어','디스트로이어','나이트레인져','어쌔신'] %}dps-row{% endif %}">
             <td>
-              <input type="checkbox" name="attend" value="{{ m['닉네임'] }}" id="attend_{{ loop.index }}" checked>
+              <input type="checkbox" name="attend" value="{{ m.닉네임 }}" checked>
             </td>
-            <td>{{ m['닉네임'] }}</td>
-            <td>{{ m['직업'] }}</td>
+            <td>{{ m.닉네임 }}</td>
+            <td>{{ m.직업 }}</td>
+            <td>{{ m.신화개수 }}</td>
             <td>
-              <input type="number" name="myth_count" value="{{ m['신화개수'] }}" min="0" style="width:40px;">
-            </td>
-            <td>
-              {% if m['직업'] == '디바인캐스터' %}
-                <input type="number" name="heal_bonus_display" value="" placeholder="자동" disabled style="width:56px;">
+              {% if m.직업 == '디바인캐스터' %}
+                <input type="number" class="healer_bonus_input" name="healer_bonus_{{ m.닉네임 }}" value="{{ request.form.heal_bonus or '3000' }}" min="0" style="width:60px;">
+              {% else %}
+                0
               {% endif %}
             </td>
             <td>
-              <input type="number" name="myth_add_display" value="" placeholder="자동" disabled style="width:56px;">
+              <input type="number" class="myth_bonus_input" name="myth_bonus_{{ m.닉네임 }}" value="{{ (m.신화개수 * (request.form.myth_unit | default(1500, true) | int)) if m.신화개수 else 0 }}" min="0" style="width:60px;">
             </td>
             <td>
-              <input type="number" name="donate" value="0" min="-999999" style="width:62px;">
-              <input type="hidden" name="donate_value" value="0">
+              <input type="number" name="donation_{{ m.닉네임 }}" value="0" min="0" style="width:60px;">
             </td>
           </tr>
           {% endfor %}
@@ -298,6 +108,22 @@
         cb.checked = check;
       });
     }
+
+    // 힐러/신화 추가금 자동입력 (상단 값 바꾸면 전체 자동 반영)
+    document.getElementById('heal_bonus').addEventListener('input', function() {
+      const val = this.value;
+      document.querySelectorAll('.healer_bonus_input').forEach(function(input){
+        input.value = val;
+      });
+    });
+    document.getElementById('myth_unit').addEventListener('input', function() {
+      const val = parseInt(this.value) || 0;
+      {% for m in members %}
+        {% if m.신화개수 %}
+      document.querySelector('input[name="myth_bonus_{{ m.닉네임 }}"]').value = {{ m.신화개수 }} * val;
+        {% endif %}
+      {% endfor %}
+    });
   </script>
 </body>
 </html>

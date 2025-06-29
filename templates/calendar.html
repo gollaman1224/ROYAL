@@ -98,6 +98,8 @@
       vertical-align: middle;
       cursor: pointer;
       border-bottom: 1px dashed #1af6ff;
+      text-decoration: none;
+      margin-right: 18px;
     }
     .participants-row:hover {
       color: #19fff5;
@@ -138,36 +140,6 @@
     .no-participants {
       color: #bbb;
       font-style: italic;
-    }
-    /* 참여자 전체 텍스트 팝업 */
-    #participants-popup {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #222930;
-      border-radius: 15px;
-      padding: 20px 30px;
-      box-shadow: 0 0 15px #1af6ffaa;
-      color: #eaf8ff;
-      max-width: 400px;
-      max-height: 60vh;
-      overflow-y: auto;
-      display: none;
-      z-index: 1000;
-      white-space: normal;
-      font-size: 1.1em;
-      line-height: 1.4;
-    }
-    #participants-popup button {
-      margin-top: 15px;
-      background: #f8687c;
-      border: none;
-      color: #fff;
-      font-weight: 900;
-      padding: 8px 18px;
-      border-radius: 10px;
-      cursor: pointer;
     }
     @media (max-width: 700px) {
       .entry-main-row {
@@ -225,13 +197,19 @@
         {% for entry in today_entries %}
           <div class="attendance-entry" title="시간: {{ entry.time }}">
             <div class="entry-main-row">
-              <div class="entry-title" style="cursor:pointer" onclick="showParticipants({{ loop.index }})">
+              <div class="entry-title">
                 {{ entry.boss }}
                 <span class="entry-meta">({{ entry.time }})</span>
               </div>
-              <div class="participants-row" onclick="showParticipants({{ loop.index }})" title="참여자 보기">
-                참여자
-              </div>
+              <a
+                class="participants-row"
+                href="{{ url_for('attendance_participants') }}?date={{ entry.date }}&time={{ entry.time }}&boss={{ entry.boss }}"
+                target="_blank"
+                title="참여자 전체 명단 보기"
+                style="text-decoration:none;"
+              >
+                참여자 보기
+              </a>
               <div class="entry-btns">
                 <form method="get" action="{{ url_for('attendance_manage') }}">
                   <input type="hidden" name="date" value="{{ entry.date }}" />
@@ -247,15 +225,6 @@
                   <button type="submit" class="delete-btn" onclick="return confirm('정말 삭제할까요?');">삭제</button>
                 </form>
               </div>
-            </div>
-
-            <!-- 숨겨진 참여자 전체 텍스트 -->
-            <div id="participants-{{ loop.index }}" style="display:none; margin-top: 8px; color:#a7f6e6; font-size:0.95em; line-height:1.4; word-break: break-word;">
-              {% if entry.participants %}
-                {{ entry.participants | join(', ') }}
-              {% else %}
-                참여자가 없습니다.
-              {% endif %}
             </div>
           </div>
         {% endfor %}
@@ -277,18 +246,5 @@
       <a href="{{ url_for('dashboard') }}" style="color: #19faff;">← 대시보드로</a>
     </div>
   </div>
-
-  <script>
-    function showParticipants(idx) {
-      const detail = document.getElementById(`participants-${idx}`);
-      if (!detail) return;
-      const isVisible = detail.style.display === 'block';
-      // 모든 숨겨진 참여자 숨기기
-      document.querySelectorAll("[id^='participants-']").forEach(el => el.style.display = 'none');
-      if (!isVisible) {
-        detail.style.display = 'block';
-      }
-    }
-  </script>
 </body>
 </html>

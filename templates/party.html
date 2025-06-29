@@ -13,7 +13,7 @@
       color: #eaf8ff;
     }
     .party-container {
-      max-width: 1050px;
+      max-width: 1350px;
       margin: 48px auto 0 auto;
       background: linear-gradient(145deg, #232b34 85%, #181c20 100%);
       border-radius: 22px;
@@ -59,22 +59,23 @@
       background: #1a2733;
     }
     .party-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 28px 36px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px 36px;
       margin-bottom: 18px;
+      align-items: start;
     }
     .party-block {
-      flex: 1 1 310px;
       background: rgba(17, 35, 49, 0.93);
       border-radius: 18px;
       box-shadow: 0 2px 15px #1af6ff22;
-      min-width: 320px;
-      max-width: 330px;
+      min-width: 0;
       padding: 19px 16px 15px 16px;
       border: 2px solid #1af6ff18;
       transition: box-shadow 0.19s;
       position: relative;
+      max-width: 420px;
+      width: 100%;
     }
     .party-block:hover {
       box-shadow: 0 0 0 3px #1af6ff, 0 6px 28px #11f6ff88;
@@ -130,7 +131,6 @@
       accent-color: #1af6ff;
       cursor: pointer;
     }
-    /* 파티 블록 버튼 그룹 - 오른쪽 정렬 */
     .party-btns {
       display: flex;
       justify-content: flex-end;
@@ -152,9 +152,12 @@
       background: #ff3c55;
       color: #fff;
     }
-    @media (max-width: 1100px) {
-      .party-list { flex-direction: column; gap: 17px 0; }
-      .party-block { min-width: 0; max-width: 100vw; }
+    @media (max-width: 1450px) {
+      .party-container { max-width: 98vw; }
+      .party-list { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 950px) {
+      .party-list { grid-template-columns: 1fr; gap: 18px 0;}
     }
     @media (max-width: 600px) {
       .party-container { padding: 2vw 0 9vw 0; }
@@ -257,7 +260,6 @@
                     <br />
                     <span style="font-size:0.87em; color:#1af6ff;">{{ char_part }}</span>
                   {% endif %}
-                  <!-- 직업별 이모티콘 -->
                   {% if member['직업'] == "뱅가드" %} 🛡️
                   {% elif member['직업'] == "버서커" %} 🪓
                   {% elif member['직업'] == "나이트레인져" %} 🏹
