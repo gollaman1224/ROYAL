@@ -359,6 +359,12 @@ def attendance_manage():
     boss_norm = normalize_boss_name(boss)
     day_attendance = [a for a in attendance if a["date"] == date]
 
+    # ------ 닉네임 검색 기능 ------
+    search = request.values.get("search", "").strip()
+    filtered_members = members
+    if search:
+        filtered_members = [m for m in members if search.lower() in m["닉네임"].lower()]
+
     if request.method == "POST":
         action = request.form.get("action", "save")
         form_time = request.form.get("time", "")
@@ -378,7 +384,11 @@ def attendance_manage():
             else:
                 attendance.append({"date": date, "time": form_time, "boss": form_boss_norm, "participants": form_participants})
             save_json(ATTENDANCE_FILE, attendance)
-            return redirect(url_for("calendar", date=date))
+            # 검색어 등 유지해서 다시 이동
+            redirect_args = {"date": date, "time": form_time, "boss": form_boss}
+            if search:
+                redirect_args["search"] = search
+            return redirect(url_for("attendance_manage", **redirect_args))
 
     record = next((a for a in attendance if a["date"] == date and a["time"] == time and normalize_boss_name(a["boss"]) == boss_norm), None)
     participants = record["participants"] if record else []
@@ -387,9 +397,34 @@ def attendance_manage():
         "attendance_manage.html",
         date=date, time=time, boss=boss,
         day_attendance=day_attendance,
-        members=members,
+        members=filtered_members,
         participants=participants
     )
+
+@app.route("/save_participant", methods=["POST"])
+@login_required
+def save_participant():
+    data = request.json
+    date = data["date"]
+    time = data["time"]
+    boss = data["boss"]
+    nick = data["nick"]
+    checked = data["checked"]
+
+    attendance = load_json(ATTENDANCE_FILE, [])
+    boss_norm = normalize_boss_name(boss)
+    record = next((a for a in attendance if a["date"] == date and a["time"] == time and normalize_boss_name(a["boss"]) == boss_norm), None)
+    if record:
+        if checked:
+            if nick not in record["participants"]:
+                record["participants"].append(nick)
+        else:
+            if nick in record["participants"]:
+                record["participants"].remove(nick)
+        save_json(ATTENDANCE_FILE, attendance)
+        return jsonify({"success": True})
+    return jsonify({"success": False})
+
 
 # -------------------- **[참여자 명단 팝업/새 창 라우트]** --------------------
 @app.route("/attendance/participants")

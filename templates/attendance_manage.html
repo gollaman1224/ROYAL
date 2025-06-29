@@ -24,34 +24,64 @@
     .add-btn { background: #2fd1e8; color: #181c20; font-weight: bold; border-radius:8px; border:none; padding:7px 14px; cursor:pointer;}
     .del-btn { background: #ff7b7b; color: #fff; border-radius:8px; border:none; padding:7px 13px; margin-left:5px; cursor:pointer;}
     .calendar-btn { background:#333d; color:#fff; font-weight:bold; border:none; border-radius:8px; padding:7px 13px; margin-left:4px; cursor:pointer;}
-    .view-participants-btn {
-      background: none;
-      border: none;
-      color: #19faff;
-      text-decoration: underline;
-      font-size: 1.02rem;
-      cursor: pointer;
-      margin-left: 8px;
-      padding: 0;
-      font-family: inherit;
-      vertical-align: middle;
-    }
-    .view-participants-btn:hover {
-      color: #1af6ff;
-      text-decoration: underline;
-    }
     @media (max-width:600px) { .container{padding:7vw 2vw 7vw 2vw;} table,th,td{font-size:0.96em;} }
+    .search-row {margin-bottom: 12px;}
+    .search-box {width: 80%; font-size:1.08em;}
+    .search-btn {margin-left: 8px;}
   </style>
+  <script>
+    // 엔터로 검색
+    document.addEventListener("DOMContentLoaded", function() {
+      var searchInput = document.getElementById("search-input");
+      if (searchInput) {
+        searchInput.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            document.getElementById("search-form").submit();
+          }
+        });
+      }
+      // 참여 체크시 즉시 반영
+      document.querySelectorAll('.checkbox').forEach(function(chk) {
+        chk.addEventListener('change', function() {
+          const data = {
+            date: "{{ date }}",
+            time: "{{ time }}",
+            boss: "{{ boss }}",
+            nick: chk.value,
+            checked: chk.checked
+          };
+          fetch("/save_participant", {
+            method: "POST",
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+          });
+        });
+      });
+    });
+  </script>
 </head>
 <body>
   <div class="container">
     <a class="back-link" href="{{ url_for('calendar') }}">← 달력으로</a>
     <h2>참여 관리</h2>
+
+    <form id="search-form" class="search-row" method="get" action="{{ url_for('attendance_manage') }}">
+      <input type="hidden" name="date" value="{{ date }}">
+      <input type="hidden" name="time" value="{{ time }}">
+      <input type="hidden" name="boss" value="{{ boss }}">
+      <input id="search-input" class="input search-box" type="text" name="search" value="{{ request.args.get('search','') }}" placeholder="닉네임 검색" autocomplete="off">
+      <button class="btn search-btn" type="submit">검색</button>
+    </form>
+
     <form method="get" action="{{ url_for('attendance_manage') }}">
       <div class="date-select flex form-row">
         <label>날짜: <input class="input" type="date" name="date" value="{{ date }}" required></label>
         <button class="calendar-btn" type="submit">이동</button>
       </div>
+      <input type="hidden" name="time" value="{{ time }}">
+      <input type="hidden" name="boss" value="{{ boss }}">
+      <!-- 전체보기 시 search 파라미터 제거 -->
     </form>
 
     <!-- 일정 등록/수정 폼 -->
@@ -63,16 +93,7 @@
         {% if boss %}
           <button class="del-btn" type="submit" name="action" value="delete" onclick="return confirm('정말 삭제할까요?');">삭제</button>
         {% endif %}
-        {% if boss and date and time %}
-          <a
-            class="view-participants-btn"
-            href="{{ url_for('attendance_participants') }}?date={{ date }}&time={{ time }}&boss={{ boss }}"
-            target="_blank"
-            title="참여자 전체 명단 새 창"
-          >[참여자 보기]</a>
-        {% endif %}
       </div>
-
       {% if members %}
       <table>
         <tr>
@@ -90,11 +111,13 @@
         {% endfor %}
       </table>
       {% endif %}
-
       {% if boss %}
         <input type="hidden" name="date" value="{{ date }}">
         <input type="hidden" name="time" value="{{ time }}">
         <input type="hidden" name="boss" value="{{ boss }}">
+        {% if request.args.get('search','') %}
+        <input type="hidden" name="search" value="{{ request.args.get('search','') }}">
+        {% endif %}
       {% endif %}
     </form>
   </div>
