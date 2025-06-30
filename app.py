@@ -11,6 +11,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "very_secret_admin_key")
 
 DATA_FILE = "members.json"
 ATTENDANCE_FILE = "attendance.json"
+ASSIGNMENT_FILE = "current_assignment.json"  # ★추가: 서버 배치 현황 저장 파일
 MAX_PER_PARTY = 5
 SERVERS = ["서버1", "서버2", "서버3", "서버4", "서버5", "서버6"]
 ADMIN_CODE = "ROYAL777"
@@ -129,6 +130,21 @@ def strength_score(m):
         score += 0.05
     return score
 
+# -------------------- [서버 배치 상태 저장/불러오기] --------------------
+def load_server_assignment(members):
+    """ current_assignment.json에 저장된 서버 배치를 읽어 멤버에 반영 """
+    if not os.path.exists(ASSIGNMENT_FILE):
+        return
+    assignment = load_json(ASSIGNMENT_FILE, {})
+    for m in members:
+        if m["닉네임"] in assignment:
+            m["서버"] = assignment[m["닉네임"]]
+
+def save_server_assignment(members):
+    """ 현 멤버별 서버 배치만 별도 저장 (닉네임-서버명 맵) """
+    assignment = {m["닉네임"]: m["서버"] for m in members}
+    save_json(ASSIGNMENT_FILE, assignment)
+
 def assign_servers(members):
     healers = [m for m in members if m["직업"] == "디바인캐스터"]
     others = [m for m in members if m["직업"] != "디바인캐스터"]
@@ -142,6 +158,7 @@ def assign_servers(members):
     for idx, member in enumerate(remaining_members):
         member["서버"] = SERVERS[idx % len(SERVERS)]
     save_members(members)
+    save_server_assignment(members)  # ★ 재배치 시 저장!
 
 # -------------------- 멤버 관리 라우트 --------------------
 @app.route("/index")
@@ -200,10 +217,12 @@ def reset_parties():
     assign_servers(members)
     return redirect(url_for("party"))
 
+# -------------------- [서버별 멤버 배치 화면] --------------------
 @app.route("/servers")
 @login_required
 def servers():
     members = load_members()
+    load_server_assignment(members)  # ★저장된 서버 배치 반영(없으면 패스)
     server_allocation = defaultdict(list)
     for m in members:
         server_allocation[m["서버"]].append(m)
@@ -223,13 +242,22 @@ def change_server():
     nick = data.get("nick")
     new_server = data.get("new_server")
     members = load_members()
+    load_server_assignment(members)
     member = next((m for m in members if m["닉네임"] == nick), None)
     if member:
         member["서버"] = new_server
         save_members(members)
+        save_server_assignment(members)  # ★수동 변경시도 저장!
         return jsonify({"success": True})
     else:
         return jsonify({"success": False, "error": "멤버를 찾을 수 없습니다."}), 404
+
+@app.route("/reassign_servers", methods=["POST"])
+@login_required
+def reassign_servers():
+    members = load_members()
+    assign_servers(members)  # ★자동배치 & 저장
+    return jsonify({"success": True})
 
 @app.route("/add")
 @login_required
@@ -322,7 +350,6 @@ def toggle_field():
     save_members(members)
     return jsonify({"success": True})
 
-# -------------------- 달력 & 출석 & 일정 --------------------
 def get_all_dates():
     attendance = load_json(ATTENDANCE_FILE, [])
     return sorted({record["date"] for record in attendance})
@@ -359,7 +386,6 @@ def attendance_manage():
     boss_norm = normalize_boss_name(boss)
     day_attendance = [a for a in attendance if a["date"] == date]
 
-    # ------ 닉네임 검색 기능 ------
     search = request.values.get("search", "").strip()
     filtered_members = members
     if search:
@@ -371,12 +397,10 @@ def attendance_manage():
         form_boss = request.form.get("boss", "")
         form_boss_norm = normalize_boss_name(form_boss)
         form_participants = request.form.getlist("participants")
-        # 삭제
         if action == "delete" and form_boss:
             attendance = [a for a in attendance if not (a["date"] == date and a["time"] == form_time and normalize_boss_name(a["boss"]) == form_boss_norm)]
             save_json(ATTENDANCE_FILE, attendance)
             return redirect(url_for("calendar", date=date))
-        # 저장(추가/수정)
         elif form_boss:
             record = next((a for a in attendance if a["date"] == date and a["time"] == form_time and normalize_boss_name(a["boss"]) == form_boss_norm), None)
             if record:
@@ -384,7 +408,6 @@ def attendance_manage():
             else:
                 attendance.append({"date": date, "time": form_time, "boss": form_boss_norm, "participants": form_participants})
             save_json(ATTENDANCE_FILE, attendance)
-            # 검색어 등 유지해서 다시 이동
             redirect_args = {"date": date, "time": form_time, "boss": form_boss}
             if search:
                 redirect_args["search"] = search
@@ -425,8 +448,6 @@ def save_participant():
         return jsonify({"success": True})
     return jsonify({"success": False})
 
-
-# -------------------- **[참여자 명단 팝업/새 창 라우트]** --------------------
 @app.route("/attendance/participants")
 @login_required
 def attendance_participants():
@@ -442,7 +463,7 @@ def attendance_participants():
         (a for a in attendance if a["date"] == date and a["time"] == time and normalize_boss_name(a["boss"]) == boss_norm),
         None,
     )
-    members = load_members()  # ← 반드시 추가!
+    members = load_members()
 
     if not record:
         return render_template(
@@ -450,7 +471,7 @@ def attendance_participants():
             boss_name=boss,
             date=date,
             time=time,
-            members=members,       # ← 반드시 넘기기
+            members=members,
             participants=[],
         )
     return render_template(
@@ -458,11 +479,10 @@ def attendance_participants():
         boss_name=boss,
         date=date,
         time=time,
-        members=members,          # ← 반드시 넘기기
+        members=members,
         participants=record["participants"],
     )
 
-# -------------------- 랭킹 (주간/월간, 보스별) --------------------
 def get_ranking(start_date, end_date, bosses=None):
     attendance = load_json(ATTENDANCE_FILE, [])
     counter = Counter()
@@ -530,7 +550,6 @@ def boss_schedule():
     attendance_map = {(a["date"], a["time"], normalize_boss_name(a["boss"])): len(a["participants"]) for a in attendance}
     return render_template("boss_schedule.html", schedules=schedules, attendance_map=attendance_map)
 
-# -------------------- 분배 라우트 --------------------
 @app.route("/distribute")
 @login_required
 def distribute():
@@ -540,25 +559,21 @@ def distribute():
 @app.route("/distribute_result", methods=["POST"])
 @login_required
 def distribute_result():
-    members = load_members()  # 전체 멤버 불러오기
+    members = load_members()
 
-    # 폼에서 참석 체크된 닉네임만 추림
     attend_nicks = request.form.getlist("attend")
     item_dia = int(request.form.get("item_dia", 0))
     strong_dia = int(request.form.get("strong_dia", 0))
     healer_bonus = int(request.form.get("heal_bonus", 0))
     myth_unit = int(request.form.get("myth_unit", 0))
 
-    # 분배 대상 멤버만 추림
     target_members = []
     for m in members:
         if m["닉네임"] not in attend_nicks:
             continue
-        # 힐러추가, 신화추가, 기부/감액은 폼에서 받아옴
         healer_extra = int(request.form.get(f"healer_bonus_{m['닉네임']}", 0))
         myth_extra = int(request.form.get(f"myth_bonus_{m['닉네임']}", 0))
         donation = int(request.form.get(f"donation_{m['닉네임']}", 0))
-        # 신화개수는 기본 멤버정보 사용
         myth_count = int(m.get("신화개수", 0))
         is_healer = m["직업"] == "디바인캐스터"
         target_members.append({
@@ -571,7 +586,6 @@ def distribute_result():
         })
 
     n = len(target_members)
-    # 기본 몫 계산
     total_dia = item_dia + strong_dia
     total_healer = sum(x["힐러추가"] for x in target_members)
     total_myth = sum(x["신화추가"] for x in target_members)
@@ -580,11 +594,9 @@ def distribute_result():
     if n > 0:
         base_share = (total_dia - total_healer - total_myth + total_donation) // n
 
-    # 최종 분배금 계산
     for m in target_members:
         m["분배금"] = base_share + m["힐러추가"] + m["신화추가"] - m["기부"]
 
-    # 미참석자
     missed = [m["닉네임"] for m in members if m["닉네임"] not in attend_nicks]
 
     result = {
@@ -603,6 +615,5 @@ def distribute_result():
 def download_attendance():
     return send_file(ATTENDANCE_FILE, as_attachment=True)
 
-# -----------------------------------------------------------
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

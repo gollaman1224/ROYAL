@@ -5,6 +5,7 @@
   <title>서버별 멤버 배치</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
   <style>
+    /* (너가 올린 스타일 100% 동일, 생략 없음) */
     body {
       background: linear-gradient(135deg, #191f28 80%, #10141a 100%);
       margin: 0;
@@ -13,12 +14,12 @@
       color: #eaf8ff;
     }
     .server-container {
-      max-width: 1380px;   /* ★ 넉넉하게 넓힘 */
+      max-width: 1380px;
       margin: 42px auto 0 auto;
       background: linear-gradient(145deg, #232b34 85%, #181c20 100%);
       border-radius: 22px;
       box-shadow: 0 8px 48px #11f3ff77, 0 0 0 2px #1af6ff3f;
-      padding: 38px 28px 40px 28px;   /* 더 넉넉하게 */
+      padding: 38px 28px 40px 28px;
       position: relative;
       overflow: hidden;
     }
@@ -60,8 +61,8 @@
     }
     .server-list {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);  /* 항상 3개 */
-      gap: 38px 36px;                        /* 카드 간격 크게 */
+      grid-template-columns: repeat(3, 1fr);
+      gap: 38px 36px;
       margin-top: 10px;
       justify-items: stretch;
       align-items: start;
@@ -190,6 +191,8 @@
       <a href="{{ url_for('party') }}" class="server-btn">파티 보기</a>
       <a href="{{ url_for('index') }}" class="server-btn">멤버 리스트</a>
       <a href="{{ url_for('dashboard') }}" class="server-btn">대시보드</a>
+      <!-- ★ 재배치 버튼 추가 -->
+      <button id="reassign-btn" class="server-btn" style="float:right;background:linear-gradient(120deg,#ffcc4d 55%,#f87171 100%);color:#1b2228;font-weight:900;">재배치(자동초기화)</button>
     </div>
     <div class="server-list">
       {% for server in servers %}
@@ -278,6 +281,7 @@
     </div>
   </div>
   <script>
+    // 서버 이동 (수동 변경)
     document.querySelectorAll('.server-select').forEach(select => {
       select.addEventListener('change', function() {
         const nick = this.getAttribute('data-nick');
@@ -298,6 +302,22 @@
         .catch(() => alert('서버와 통신 실패'));
       });
     });
+
+    // "재배치" 버튼 (자동 배치/초기화)
+    document.getElementById('reassign-btn').onclick = function() {
+      if(confirm('서버 멤버 배치를 자동으로 재배치합니다.\n기존 배치는 모두 초기화됩니다.\n계속하시겠습니까?')) {
+        fetch('{{ url_for("reassign_servers") }}', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'}
+        })
+        .then(res => res.json())
+        .then(data => {
+          if(data.success) location.reload();
+          else alert('재배치 실패');
+        })
+        .catch(() => alert('서버와 통신 실패'));
+      }
+    };
   </script>
 </body>
 </html>
