@@ -5,7 +5,6 @@
   <title>서버별 멤버 배치</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
   <style>
-    /* (너가 올린 스타일 100% 동일, 생략 없음) */
     body {
       background: linear-gradient(135deg, #191f28 80%, #10141a 100%);
       margin: 0;
@@ -14,17 +13,17 @@
       color: #eaf8ff;
     }
     .server-container {
-      max-width: 1380px;
+      max-width: 1500px;
       margin: 42px auto 0 auto;
       background: linear-gradient(145deg, #232b34 85%, #181c20 100%);
       border-radius: 22px;
       box-shadow: 0 8px 48px #11f3ff77, 0 0 0 2px #1af6ff3f;
-      padding: 38px 28px 40px 28px;
+      padding: 38px 12px 40px 12px;
       position: relative;
       overflow: hidden;
     }
     .server-title {
-      font-size: 2.16rem;
+      font-size: 2.2rem;
       color: #1af6ff;
       font-weight: 900;
       letter-spacing: 2.2px;
@@ -62,7 +61,7 @@
     .server-list {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 38px 36px;
+      gap: 28px 24px;
       margin-top: 10px;
       justify-items: stretch;
       align-items: start;
@@ -72,27 +71,41 @@
       border-radius: 18px;
       box-shadow: 0 2px 18px #1af6ff22;
       border: 2px solid #1af6ff18;
-      padding: 18px 15px 17px 15px;
+      padding: 22px 18px 18px 18px;
       transition: box-shadow 0.14s;
       min-width: 0;
       position: relative;
+      overflow-x: auto;
     }
     .server-block:hover {
       box-shadow: 0 0 0 2.5px #1af6ff, 0 4px 32px #11f3ffaa;
     }
     .server-header {
-      font-size: 1.22rem;
-      font-weight: 900;
-      color: #1af6ff;
       margin-bottom: 13px;
-      text-shadow: 0 0 8px #1af6ff22;
       text-align: center;
       letter-spacing: 1.3px;
+    }
+    .server-title-big {
+      font-size: 2.7rem;
+      font-family: 'Orbitron','Malgun Gothic',sans-serif;
+      font-weight: 900;
+      color: #2cf0ff;
+      text-shadow: 0 0 18px #0fd7ff, 0 0 16px #12f1f844, 0 2px 10px #2229;
+      letter-spacing: 2.2px;
+      display: inline-block;
+      padding: 8px 36px;
+      border-radius: 18px;
+      background: linear-gradient(92deg, #111e3f 70%, #1af6ff0d 100%);
+      border: 2.5px solid #1af6ff80;
+      margin-bottom: 6px;
+      margin-top: 2px;
+      box-shadow: 0 0 8px #00e7ff5c, 0 0 0 1.5px #1af6ff6a inset;
+      text-decoration: underline;
     }
     .server-warning {
       color: #ff6a91;
       font-weight: 800;
-      font-size: 1.05rem;
+      font-size: 1.07rem;
       display: block;
       margin-bottom: 9px;
       text-align: center;
@@ -101,7 +114,7 @@
     .server-good {
       color: #7fffcc;
       font-weight: 800;
-      font-size: 1.03rem;
+      font-size: 1.07rem;
       display: block;
       margin-bottom: 9px;
       text-align: center;
@@ -109,78 +122,131 @@
     }
     table {
       width: 100%;
-      border-collapse: collapse;
-      font-size: 1.02rem;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 1.13em;
       background: transparent;
       margin-bottom: 8px;
       border-radius: 13px;
       overflow: hidden;
-      table-layout: fixed;
+      table-layout: auto;
+      min-width: 640px;
     }
     th, td {
-      padding: 8px 3px;
+      padding: 11px 6px 10px 6px;
       text-align: center;
-      border-bottom: 1px solid #1af6ff14;
+      border-bottom: 1.5px solid #13ffe629;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      min-width: 38px;
+    }
+    th.nick-cell, td.nick-cell {
+      min-width: 120px !important;
+      text-align: left;
+    }
+    th.job-cell, td.job-cell {
+      min-width: 86px !important;
+    }
+    th.server-move-cell, td.server-move-cell {
+      min-width: 110px !important;
     }
     th {
-      background: #1af6ff0f;
+      background: #1af6ff12;
       color: #1af6ff;
-      font-weight: 800;
-      letter-spacing: 1px;
-      font-size: 1em;
+      font-weight: 900;
+      letter-spacing: 1.1px;
+      font-size: 1.07em;
     }
     td {
       color: #eaf8ff;
-      font-size: 1em;
+      font-size: 1.03em;
+      background: transparent;
+      transition: background 0.18s;
+    }
+    tr:hover td {
+      background: #19a1ff19;
     }
     tr:last-child td {
       border-bottom: none;
     }
-    td strong {
-      color: #1af6ff;
+    .main-nick {
+      display: block;
+      font-size: 1.23em;
       font-weight: 900;
-      letter-spacing: 0.6px;
+      letter-spacing: 1.1px;
+      line-height: 1.16em;
     }
-    td .char-part {
-      font-size: 0.82em;
-      color: #47eaff;
-      font-weight: 700;
+    .char-part {
+      font-size: 1.01em;
+      font-weight: 800;
+      line-height: 1.06em;
+      opacity: 0.87;
+      display: block;
+      margin-top: 1.5px;
+      letter-spacing: 0.5px;
+      color: #ffa14d;
     }
+    .job-icon { font-size: 1.20em; margin-right: 4px; vertical-align: -2px;}
+    /* 직업별 색상 */
+    .job-vanguard { color: #00e0ff !important; }
+    .job-berserker { color: #ff425c !important; }
+    .job-nightranger { color: #5ad1ff !important; }
+    .job-assassin { color: #ffd92d !important; }
+    .job-divinecaster { color: #fd5aff !important; }
+    .job-elemental { color: #53ff72 !important; }
+    .job-deathbringer { color: #e572ff !important; }
+    .job-destroyer { color: #ffe79b !important; }
+    /* 닉네임 색상 */
+    .nick-color-1 { color: #22e0ff !important; }
+    .nick-color-2 { color: #fdff6a !important; }
+    .nick-color-3 { color: #ff9d57 !important; }
+    .nick-color-4 { color: #fd6aff !important; }
+    .nick-color-5 { color: #53ffb5 !important; }
+    .nick-color-6 { color: #a3b9ff !important; }
+    .nick-color-7 { color: #ffd69a !important; }
+    .nick-color-8 { color: #ff7575 !important; }
+    .nick-color-9 { color: #73ffd7 !important; }
+    .nick-color-10 { color: #b1f1ff !important; }
     select.server-select {
-      padding: 2.5px 6px;
-      border-radius: 7px;
-      border: 1px solid #1af6ff55;
+      padding: 3.5px 10px;
+      border-radius: 8px;
+      border: 1.2px solid #1af6ff77;
       background: #17252c;
       color: #1af6ff;
       font-family: inherit;
-      font-size: 0.97em;
+      font-size: 1.01em;
       margin-left: 0;
       margin-right: 1px;
       transition: border 0.13s;
     }
     select.server-select:focus {
-      border: 1.6px solid #1af6ffcc;
+      border: 2px solid #1af6ffcc;
       outline: none;
-    }
-    .job-icon { font-size: 1.08em; margin-right: 2.5px; vertical-align: -2px;}
-    @media (max-width: 1600px) {
-      .server-container { max-width: 100vw; }
     }
     @media (max-width: 1100px) {
       .server-container { padding: 8px 0 10vw 0; }
       .server-title { font-size: 1.32rem; }
-      .server-list { grid-template-columns: 1fr 1fr; gap: 32px 18px;}
+      .server-list { grid-template-columns: 1fr 1fr; gap: 18px 10px;}
+      table, th, td { font-size: 0.97em;}
     }
     @media (max-width: 900px) {
-      .server-list { grid-template-columns: 1fr; gap: 22px 0;}
+      .server-list { grid-template-columns: 1fr; gap: 14px 0;}
+      .server-block { padding: 10px 1vw 10px 1vw; }
+      table, th, td { font-size: 0.93em;}
     }
     @media (max-width: 700px) {
       .server-container { padding: 1vw 1vw 11vw 1vw; }
       .server-title { font-size: 1.08rem; }
-      table, th, td { font-size: 0.95em; }
+      table, th, td { font-size: 0.90em; }
+      th, td { min-width: 32px; }
+      th.nick-cell, td.nick-cell { min-width: 80px !important;}
+      th.job-cell, td.job-cell { min-width: 50px !important;}
+      th.server-move-cell, td.server-move-cell { min-width: 70px !important;}
+      .server-title-big { font-size: 1.3rem; padding: 4px 2vw; }
+    }
+    @media (max-width: 1200px) {
+      .server-title-big { font-size: 2.05rem; padding: 6px 8vw; }
     }
   </style>
 </head>
@@ -191,7 +257,6 @@
       <a href="{{ url_for('party') }}" class="server-btn">파티 보기</a>
       <a href="{{ url_for('index') }}" class="server-btn">멤버 리스트</a>
       <a href="{{ url_for('dashboard') }}" class="server-btn">대시보드</a>
-      <!-- ★ 재배치 버튼 추가 -->
       <button id="reassign-btn" class="server-btn" style="float:right;background:linear-gradient(120deg,#ffcc4d 55%,#f87171 100%);color:#1b2228;font-weight:900;">재배치(자동초기화)</button>
     </div>
     <div class="server-list">
@@ -212,7 +277,9 @@
       {% if compass_count < members|length %} {% set _ = warnings.append("나침반 미달(" ~ compass_count ~ "/" ~ members|length ~ ")") %} {% endif %}
       {% if myth_sum < 10 %} {% set _ = warnings.append("신화합계 10 미만(" ~ myth_sum ~ ")") %} {% endif %}
       <div class="server-block" data-server="{{ server }}">
-        <div class="server-header">{{ server }}</div>
+        <div class="server-header">
+          <span class="server-title-big">{{ server }}</span>
+        </div>
         {% if warnings %}
           <span class="server-warning">⚠️ {{ warnings|join(', ') }}</span>
         {% else %}
@@ -221,30 +288,39 @@
         <table>
           <thead>
             <tr>
-              <th style="width:95px;">닉네임</th>
-              <th style="width:84px;">직업</th>
-              <th style="width:36px;">신화</th>
-              <th style="width:38px;">전설</th>
-              <th style="width:38px;">나침반</th>
-              <th style="width:84px;">서버 이동</th>
+              <th class="nick-cell">닉네임</th>
+              <th class="job-cell">직업</th>
+              <th>신화</th>
+              <th>전설</th>
+              <th>나침반</th>
+              <th class="server-move-cell">서버 이동</th>
             </tr>
           </thead>
           <tbody>
             {% for member in members %}
             <tr>
-              <td>
+              <td class="nick-cell">
                 {% set full_name = member['닉네임'] %}
-                {% set name_part = full_name.split('(')[0] %}
+                {% set name_part = full_name.split('(')[0].strip() %}
                 {% set char_part = '' %}
                 {% if '(' in full_name and ')' in full_name %}
                   {% set char_part = full_name.split('(')[1].rstrip(')') %}
                 {% endif %}
-                <strong>{{ name_part }}</strong>
+                <span class="main-nick nick-color-{{ member.nick_color|default(1) }}">{{ name_part }}</span>
                 {% if char_part %}
-                  <br><span class="char-part">{{ char_part }}</span>
+                  <span class="char-part">{{ char_part }}</span>
                 {% endif %}
               </td>
-              <td style="font-weight:700; color: {{ job_colors.get(member['직업'], '#7bf') }};">
+              <td class="job-cell
+                {% if member['직업'] == "뱅가드" %}job-vanguard{% endif %}
+                {% if member['직업'] == "버서커" %}job-berserker{% endif %}
+                {% if member['직업'] == "나이트레인져" %}job-nightranger{% endif %}
+                {% if member['직업'] == "어쌔신" %}job-assassin{% endif %}
+                {% if member['직업'] == "디바인캐스터" %}job-divinecaster{% endif %}
+                {% if member['직업'] == "엘리멘탈" %}job-elemental{% endif %}
+                {% if member['직업'] == "데스브링어" %}job-deathbringer{% endif %}
+                {% if member['직업'] == "디스트로이어" %}job-destroyer{% endif %}
+                ">
                 <span class="job-icon">
                   {% if member['직업'] == "뱅가드" %}🛡️
                   {% elif member['직업'] == "버서커" %}🪓
@@ -258,14 +334,14 @@
                 </span>
                 {{ member['직업'] }}
               </td>
-              <td style="font-weight:700; color:#1af6ff;">{{ member['신화개수'] }}</td>
+              <td style="font-weight:900; color:#1af6ff;">{{ member['신화개수'] }}</td>
               <td>
                 {% if member.get('전설스킬', '없음') == '있음' %}✔️{% else %}✘{% endif %}
               </td>
               <td>
                 {% if member.get('나침반', '') == 'O' %}✔️{% else %}✘{% endif %}
               </td>
-              <td>
+              <td class="server-move-cell">
                 <select class="server-select" data-nick="{{ member['닉네임'] }}">
                   {% for s in servers %}
                   <option value="{{ s }}" {% if member["서버"] == s %}selected{% endif %}>{{ s }}</option>

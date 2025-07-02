@@ -6,18 +6,25 @@ from collections import defaultdict, Counter
 from functools import wraps
 import re
 
+# ★ 닉네임 색상 인덱스 함수 추가
+def calc_nick_color_index(nick, color_count=10):
+    """닉네임의 첫 글자 유니코드로 색상 인덱스 반환 (1~color_count)"""
+    if not nick:
+        return 1
+    first = nick.strip()[0]
+    return (ord(first) % color_count) + 1
+
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "very_secret_admin_key")
 
 DATA_FILE = "members.json"
 ATTENDANCE_FILE = "attendance.json"
-ASSIGNMENT_FILE = "current_assignment.json"  # ★추가: 서버 배치 현황 저장 파일
+ASSIGNMENT_FILE = "current_assignment.json"
 MAX_PER_PARTY = 5
-SERVERS = ["서버1", "서버2", "서버3", "서버4", "서버5", "서버6"]
+SERVERS = ["피데스", "모르스", "메투스", "호노르", "돌도르", "살루스"]
 ADMIN_CODE = "ROYAL777"
 EXCLUDED_BOSSES = {"차원의 틈"}
 
-# -------------------- [보스명 통일화 함수] --------------------
 def normalize_boss_name(boss):
     if not boss:
         return ""
@@ -25,7 +32,6 @@ def normalize_boss_name(boss):
     s = re.sub(r"(어비스|abys?)[\s\-]*([0-9]+)[\s\-]*(층|f)?", lambda m: f"어비스{m.group(2)}층", s)
     return s
 
-# -------------------- 로그인 --------------------
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -58,7 +64,6 @@ def logout():
     session.pop("logged_in", None)
     return redirect(url_for("login"))
 
-# -------------------- 파일 입출력 --------------------
 def load_json(filename, default=[]):
     if os.path.exists(filename):
         with open(filename, "r", encoding="utf-8") as f:
@@ -69,7 +74,6 @@ def save_json(filename, data):
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-# -------------------- 멤버/파티 관리 --------------------
 def load_members():
     members = load_json(DATA_FILE, [])
     for m in members:
@@ -130,9 +134,7 @@ def strength_score(m):
         score += 0.05
     return score
 
-# -------------------- [서버 배치 상태 저장/불러오기] --------------------
 def load_server_assignment(members):
-    """ current_assignment.json에 저장된 서버 배치를 읽어 멤버에 반영 """
     if not os.path.exists(ASSIGNMENT_FILE):
         return
     assignment = load_json(ASSIGNMENT_FILE, {})
@@ -141,7 +143,6 @@ def load_server_assignment(members):
             m["서버"] = assignment[m["닉네임"]]
 
 def save_server_assignment(members):
-    """ 현 멤버별 서버 배치만 별도 저장 (닉네임-서버명 맵) """
     assignment = {m["닉네임"]: m["서버"] for m in members}
     save_json(ASSIGNMENT_FILE, assignment)
 
@@ -158,9 +159,8 @@ def assign_servers(members):
     for idx, member in enumerate(remaining_members):
         member["서버"] = SERVERS[idx % len(SERVERS)]
     save_members(members)
-    save_server_assignment(members)  # ★ 재배치 시 저장!
+    save_server_assignment(members)
 
-# -------------------- 멤버 관리 라우트 --------------------
 @app.route("/index")
 @login_required
 def index():
@@ -217,14 +217,15 @@ def reset_parties():
     assign_servers(members)
     return redirect(url_for("party"))
 
-# -------------------- [서버별 멤버 배치 화면] --------------------
 @app.route("/servers")
 @login_required
 def servers():
     members = load_members()
-    load_server_assignment(members)  # ★저장된 서버 배치 반영(없으면 패스)
+    load_server_assignment(members)
     server_allocation = defaultdict(list)
+    # 닉네임 컬러 인덱스 계산해서 멤버 dict에 추가
     for m in members:
+        m["nick_color"] = calc_nick_color_index(m["닉네임"])
         server_allocation[m["서버"]].append(m)
     job_colors = {
         "뱅가드": "#ff0000", "버서커": "#ff5c5c", "나이트레인져": "#0099ff", "어쌔신": "#ff9900",
@@ -247,7 +248,7 @@ def change_server():
     if member:
         member["서버"] = new_server
         save_members(members)
-        save_server_assignment(members)  # ★수동 변경시도 저장!
+        save_server_assignment(members)
         return jsonify({"success": True})
     else:
         return jsonify({"success": False, "error": "멤버를 찾을 수 없습니다."}), 404
@@ -256,7 +257,7 @@ def change_server():
 @login_required
 def reassign_servers():
     members = load_members()
-    assign_servers(members)  # ★자동배치 & 저장
+    assign_servers(members)
     return jsonify({"success": True})
 
 @app.route("/add")
