@@ -568,7 +568,7 @@ def distribute_result():
     healer_bonus = int(request.form.get("heal_bonus", 0))
     myth_unit = int(request.form.get("myth_unit", 0))
 
-    target_members = []
+    target_members = []  # 👈 무조건 함수 안에서 선언
     for m in members:
         if m["닉네임"] not in attend_nicks:
             continue
@@ -577,6 +577,9 @@ def distribute_result():
         donation = int(request.form.get(f"donation_{m['닉네임']}", 0))
         myth_count = int(m.get("신화개수", 0))
         is_healer = m["직업"] == "디바인캐스터"
+        # 👇 힐러+신화1개 이상이면 추가금 0
+        if is_healer and myth_count >= 1:
+            healer_extra = 0
         target_members.append({
             "닉네임": m["닉네임"],
             "직업": m["직업"],
